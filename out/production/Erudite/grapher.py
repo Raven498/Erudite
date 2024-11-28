@@ -20,24 +20,30 @@ for filename in filenames:
             if data == "X:":
                 curr_list = "x"
                 continue
-            if data == "\n" or data == '' or data == "ADJ Y:":
+            if data == "\n" or data == '': #or data == "ADJ Y:":
                 continue
+            if data == "ADJ Y:": #temporary condition for read-only mode
+                    break
             if curr_list == "x":
                 x.append(float(data))
             if curr_list == "y":
                 y_curr = float(data)
+                print(y_curr)
                 y.append(y_curr)
+                print(len(x))
+                print(len(y))
                 y_adj.append((x[i] * r) + (y_curr * (1 - (r ** 2)) ** (1 / 2)))
                 i += 1
-
+    '''
     with open(filename, "a") as file:
         for y_ind in y_adj:
             file.write(str(y_ind) + "\n")
+    '''
     print(x)
     print(y)
     plt.plot(x, y_adj, 'o')
-    '''
 
+'''
 with open("Data.txt", "a") as file:
     file.write("\nADJ Y:\n")
     for i in range(len(y) - 1):

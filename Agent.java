@@ -176,18 +176,18 @@ public class Agent {
         }
 
         double[] reward_lsrl = regression(prelim_targets, prelim_rewards);
-        double[] target_lsrl = regression(f, t);
+        double[] target_lsrl = regression(f, train_t);
         System.out.println("REWARD LSRL: y =  " + reward_lsrl[0] + "x + " + reward_lsrl[1]);
         System.out.println("TARGET LSRL: y =  " + target_lsrl[0] + "x + " + target_lsrl[1]);
-        System.out.println(0.80 * (stdev(t) / stdev(f)));
+        System.out.println(0.80 * (stdev(train_t) / stdev(f)));
 
-        /*
+
+        //GOAL CREATION
+
+
         //STEP 2: PRL-POWERED EXPLORATION
-        while(true){
 
-        }
 
-         */
 
     }
 }
