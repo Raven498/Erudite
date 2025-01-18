@@ -18,7 +18,7 @@ public class Agent {
     //Mainloop method
     public void cycle(){
         for(Environment env : trueKB.getEnvSet()){
-
+            
         }
     }
 
@@ -189,7 +189,7 @@ public class Agent {
         System.out.println(0.80 * (stdev(train_t) / stdev(f)));
 
 
-        //GOAL CREATION
+        //POLICY CREATION
 
 
         //STEP 2: PRL-POWERED EXPLORATION
