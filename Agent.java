@@ -6,7 +6,8 @@ import java.util.Random;
 public class Agent {
     public enum KClasses{
         RELATIONSHIP,
-        POLICY
+        POLICY,
+        ACTION
     }
     KnowledgeBase trueKB;
 
@@ -34,12 +35,18 @@ public class Agent {
         }
     }
 
+    /*
+    Reads all environmental data + constructs environmental approximation
+     */
     public void approx(Environment true_env){
         for(Knowledge k : true_env.getKnowledge()){
             if(k.kclass == KClasses.POLICY){
 
             }
             if(k.kclass == KClasses.RELATIONSHIP){
+
+            }
+            if(k.kclass == KClasses.ACTION){
 
             }
         }
