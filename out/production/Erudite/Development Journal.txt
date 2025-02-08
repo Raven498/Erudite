@@ -1,0 +1,47 @@
+TASK LIST:
+1. PRL Simulation
+2. TKB Planning
+
+
+
+True Knowledge Base Plan:
+--------------------------
+(Syntax):
+Current Considerations:
+- Need standard formats to deliver true knowledge to agent
+	- Can be organized in RDBMS
+	- Should be determined after analysis of source material
+- What characteristics of true knowledge can be delivered to agent and what must be determined by agent independently?
+
+
+
+
+
+(Current Sources):
+AP Subjects: Contain wide subject variety, standardized content formats
+	- AP Calculus BC: Demonstrates agent ability to efficiently learn large corpuses and apply knowledge within one domain
+		- (Description):
+			SIZE & BREADTH: Source corpus is very large, covering wide variety of calculus theoretical topics across multiple subdisciplines. Allows agent to demonstrate 				learning and organization abilities across one domain.
+
+			ONE-DOMAIN APPLICATION: Source contains immediate applications for most native fundamental theoretical topics, allowing demonstration of application abilities 				within one domain only.
+
+		- (Curriculum):
+			- Derivative Theory (Quotient, Product, Power, Chain, MVT)
+			- Derivative Applications (Related Rates, First Derivative Test)
+			- Integration Theory (Riemann Sums, Antiderivatives, Fundamental Theorem)
+				- Methods of Integration (U-substitution, Partial Fractions)
+			- Integration Applications (Average Value, Area between Curves)
+	- AP Physics I: Demonstrates agent ability to learn + apply both domain-specific and generalized knowledge
+		- (Description):
+			MULTI-DOMAIN INTEGRATION: Source combines fundamental skills from the AP Calculus domain with native knowledge from its domain.
+
+		- (Curriculum):
+			- Motion & Kinematics (Algebra-Based) - position/velocity/acceleration, kinematic equations
+			- Motion & Kinematics (Calculus-Based) - deriving position/velocity/acceleration functions using calculus (Apply from AP Calculus)
+	- AP European History: Demonstrates agent ability to efficiently learn large corpuses and apply knowledge within one domain
+		- (Description):
+			SIZE & BREADTH: Source corpus is very large, covering wide variety of historical knowledge. Allows agent to demonstrate learning and organization abilities across 			one domain.
+
+			ONE-DOMAIN APPLICATION: Source contains immediate applications for most native fundamental theoretical topics, allowing demonstration of application abilities 				within one domain only.
+	- AP Literature & Composition: Demonstrates agent ability to completely apply knowledge from anothe
+		- 

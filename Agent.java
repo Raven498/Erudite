@@ -1,18 +1,35 @@
 import java.io.File;  // Import the File class
 import java.io.FileNotFoundException;  // Import this class to handle errors
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Scanner; // Import the Scanner class to read text files
 import java.util.Random;
 public class Agent {
     public enum KClasses{
         RELATIONSHIP,
         POLICY,
-        ACTION
+        ALGORITHM
     }
     KnowledgeBase trueKB;
 
     public Agent(KnowledgeBase trueKB){
         this.trueKB = trueKB;
+    }
+
+    /*
+    TKB input content parsing algorithm
+    May be different depending on environment type
+     */
+    public void parse(String name, String type, String content){
+        if(type.equals("Algorithm")){
+            Algorithm algo = new Algorithm();
+            algo.name = name;
+            //ALGORITHM CONTENT PARSING (mathematical --> OOP syntax)
+            String[] c = content.split(",");
+            String in = c[0];
+            String f = c[1];
+
+        }
     }
 
     //Mainloop method
@@ -24,13 +41,6 @@ public class Agent {
 
     public void accumulate(){
         for(Environment env : trueKB.getEnvSet()){
-            /*
-            for(Environment approx_env : approxKB.getEnvSet()){
-                if(approx_env.getEnvId() == env.getEnvId()){
-                    continue;
-                }
-            }
-             */
             approx(env);
         }
     }
@@ -46,7 +56,8 @@ public class Agent {
             if(k.kclass == KClasses.RELATIONSHIP){
 
             }
-            if(k.kclass == KClasses.ACTION){
+            if(k.kclass == KClasses.ALGORITHM){
+                
 
             }
         }
@@ -55,6 +66,7 @@ public class Agent {
     public double reward(State s){
         return 1.8 * s.getTarget();
     }
+    public double func(double[] lsrl, double x){return (lsrl[0] * x) + lsrl[1];}
 
     public double[] regression(ArrayList<Double> x, ArrayList<Double> y) {
         double mean_x = 0;
@@ -98,7 +110,7 @@ public class Agent {
         return stdev;
     }
 
-    public void PRL(){
+    public State PRL(){
         boolean adjY = false;
         boolean xMode = false;
         ArrayList<Double> train_t = new ArrayList<>(); //training targets
@@ -161,8 +173,8 @@ public class Agent {
 
         ArrayList<State> states = new ArrayList<>();
 
-        for(double target : t){
-            State state = new State(target);
+        for(int i = 0; i < t.size(); i++){
+            State state = new State(t.get(i), f.get(i));
             states.add(state);
         }
 
@@ -188,13 +200,50 @@ public class Agent {
         System.out.println("TARGET LSRL: y =  " + target_lsrl[0] + "x + " + target_lsrl[1]);
         System.out.println(0.80 * (stdev(train_t) / stdev(f)));
 
+        double[] x_state_domain = new double[states.size()];
+        for(int i = 0; i < states.size(); i++){
+            x_state_domain[i] = states.get(i).getFeature();
+        }
 
         //POLICY CREATION
+        Goal r_goal;
+        Goal t_goal;
+        if(reward_lsrl[0] >= 0){
+            r_goal = new Goal("max", reward_lsrl, target_lsrl);
+        } else{
+            r_goal = new Goal("min", reward_lsrl, target_lsrl);
+        }
 
+        if(target_lsrl[0] >= 0){
+            t_goal = new Goal("max", target_lsrl, x_state_domain);
+        } else{
+            t_goal = new Goal("min", target_lsrl, x_state_domain);
+        }
 
         //STEP 2: PRL-POWERED EXPLORATION
+        double f_extr = 0;
+        State final_s = null;
+        int index = 0;
+        if(t_goal.action.equals("max")){
+            for(State s : states){
+                if(s.getFeature() >= f_extr){
+                    f_extr = s.getFeature();
+                    final_s = s;
+                    index = states.indexOf(final_s);
+                }
+            }
+        }
+        else{
+            for(State s : states){
+                if(s.getFeature() <= f_extr){
+                    f_extr = s.getFeature();
+                    final_s = s;
+                }
+            }
+        }
 
-
-
+        System.out.println(f_extr);
+        System.out.println(index);
+        return final_s;
     }
 }
