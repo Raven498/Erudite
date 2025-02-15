@@ -11,6 +11,7 @@ public class Agent {
         ALGORITHM
     }
     KnowledgeBase trueKB;
+    KnowledgeBase approxKB;
 
     public Agent(KnowledgeBase trueKB){
         this.trueKB = trueKB;
@@ -20,36 +21,41 @@ public class Agent {
     TKB input content parsing algorithm
     May be different depending on environment type
      */
-    public void parse(String name, String type, String content){
-        if(type.equals("Algorithm")){
-            Algorithm algo = new Algorithm();
-            algo.name = name;
-            //ALGORITHM CONTENT PARSING (mathematical --> OOP syntax)
-            String[] c = content.split(",");
-            String in = c[0];
-            String f = c[1];
+    public Algorithm parseAlgo(String name, String content){
+        Algorithm algo = new Algorithm();
+        algo.name = name;
 
-        }
+        //STAGE 1: INPUT PARSING (INPUT --> PARSED)
+        /*
+        String[] c = content.split(",");
+        String in = c[0];
+        String f = c[1];
+*/
+        return algo;
     }
 
     //Mainloop method
     public void cycle(){
-        for(Environment env : trueKB.getEnvSet()){
-            
-        }
+        accumulate();
     }
 
     public void accumulate(){
+        KnowledgeBase akb = new KnowledgeBase();
+        ArrayList<Environment> approx_env_set = new ArrayList<>();
         for(Environment env : trueKB.getEnvSet()){
-            approx(env);
+            approx_env_set.add(approx(env));
         }
+        akb.setEnvSet(approx_env_set);
+        approxKB = akb;
     }
 
     /*
     Reads all environmental data + constructs environmental approximation
      */
-    public void approx(Environment true_env){
+    public Environment approx(Environment true_env){
+        Environment approx_env = new Environment();
         for(Knowledge k : true_env.getKnowledge()){
+            Knowledge k_a = new Knowledge(k.name, k.content, k.kclass);
             if(k.kclass == KClasses.POLICY){
 
             }
@@ -57,10 +63,12 @@ public class Agent {
 
             }
             if(k.kclass == KClasses.ALGORITHM){
-                
-
+                k_a = parseAlgo(k.name, k.content);
             }
+            approx_env.addKnowledge(k_a);
+            System.out.println(k_a);
         }
+        return approx_env;
     }
 
     public double reward(State s){

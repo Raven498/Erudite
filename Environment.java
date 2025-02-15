@@ -6,4 +6,8 @@ public class Environment {
     public ArrayList<Knowledge> getKnowledge(){
         return knowledge;
     }
+
+    public void addKnowledge(Knowledge k){
+        knowledge.add(k);
+    }
 }
