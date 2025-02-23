@@ -8,6 +8,6 @@ public class KnowledgeBase {
     }
 
     public void setEnvSet(ArrayList<Environment> env_set){
-        env_set = this.env_set;
+        this.env_set = env_set;
     }
 }

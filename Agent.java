@@ -22,21 +22,27 @@ public class Agent {
     May be different depending on environment type
      */
     public Algorithm parseAlgo(String name, String content){
-        Algorithm algo = new Algorithm();
+        Algorithm algo = new Algorithm(name, content, KClasses.ALGORITHM);
         algo.name = name;
 
         //STAGE 1: INPUT PARSING (INPUT --> PARSED)
-        /*
-        String[] c = content.split(",");
-        String in = c[0];
-        String f = c[1];
-*/
+        String[] c_reg = content.split("///");
+        for(String c : c_reg){
+            //if()
+        }
+
         return algo;
     }
 
     //Mainloop method
     public void cycle(){
         accumulate();
+        //(PRL SIM NEXT BEFORE INTERACTION)
+        /*
+        FEED PREPARED STATE-REWARD TRAJECTORY DATA TO PRL ALGORITHM
+        (INTERACTION WILL INVOLVE SYSTEMATIC ITERATION OF STATES TO CREATE TRAJ)
+         */
+        interact();
     }
 
     public void accumulate(){
@@ -49,13 +55,17 @@ public class Agent {
         approxKB = akb;
     }
 
+    //Interaction Phase
+    public void interact(){
+
+    }
+
     /*
     Reads all environmental data + constructs environmental approximation
      */
     public Environment approx(Environment true_env){
         Environment approx_env = new Environment();
         for(Knowledge k : true_env.getKnowledge()){
-            Knowledge k_a = new Knowledge(k.name, k.content, k.kclass);
             if(k.kclass == KClasses.POLICY){
 
             }
@@ -63,10 +73,9 @@ public class Agent {
 
             }
             if(k.kclass == KClasses.ALGORITHM){
-                k_a = parseAlgo(k.name, k.content);
+                Algorithm k_a = parseAlgo(k.name, k.content);
+                approx_env.addKnowledge(k_a);
             }
-            approx_env.addKnowledge(k_a);
-            System.out.println(k_a);
         }
         return approx_env;
     }
@@ -74,6 +83,7 @@ public class Agent {
     public double reward(State s){
         return 1.8 * s.getTarget();
     }
+
     public double func(double[] lsrl, double x){return (lsrl[0] * x) + lsrl[1];}
 
     public double[] regression(ArrayList<Double> x, ArrayList<Double> y) {

@@ -1,7 +1,7 @@
 import java.util.ArrayList;
 
 public class Environment {
-    private ArrayList<Knowledge> knowledge;
+    private ArrayList<Knowledge> knowledge = new ArrayList<>();
 
     public ArrayList<Knowledge> getKnowledge(){
         return knowledge;
