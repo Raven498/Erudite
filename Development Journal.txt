@@ -1,9 +1,3 @@
-TASK LIST:
-1. PRL Simulation
-2. TKB Planning
-
-
-
 True Knowledge Base Plan:
 --------------------------
 (Syntax):
@@ -28,7 +22,7 @@ AP Subjects: Contain wide subject variety, standardized content formats
 			- Integration Theory (Riemann Sums, Antiderivatives, Fundamental Theorem)
 				- Methods of Integration (U-substitution, Partial Fractions)
 			- Integration Applications (Average Value, Area between Curves)
-	- AP Physics I: Demonstrates agent ability to learn + apply both domain-specific and generalized knowledge
+	- AP Physics M: Demonstrates agent ability to learn + apply both domain-specific and generalized knowledge
 		- (Description):
 			MULTI-DOMAIN INTEGRATION: Source combines fundamental skills from the AP Calculus domain with native knowledge from its domain.
 
@@ -40,8 +34,9 @@ AP Subjects: Contain wide subject variety, standardized content formats
 			SIZE & BREADTH: Source corpus is very large, covering wide variety of historical knowledge. Allows agent to demonstrate learning and organization abilities across 			one domain.
 
 			ONE-DOMAIN APPLICATION: Source contains immediate applications for most native fundamental theoretical topics, allowing demonstration of application abilities within one domain only.
-	- AP Literature & Composition: Demonstrates agent ability to completely apply knowledge from anothe
-		- 
+		
+		- (Curriculum):
+			- (TBD)
 
 2/12 PLAN UPDATE:
 ------------------------------
