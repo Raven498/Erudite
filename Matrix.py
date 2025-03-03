@@ -1,7 +1,7 @@
 import random
 
 
-# File(baoisdumb.txt, False) -> Numeric | Numeric(prev) -> Numeric (0, 100, 0.7, 1)
+# File(baoisdumb.txt, False) -> Numeric | Numeric(prev) -> Numeric (0, 100, 0.7, 1) | Numeric(prev) -> File(baoissmart.txt)
 
 class Numeric:
     def __init__(self, x, y, x_min, x_max, y_min, y_max, r, n):
@@ -48,7 +48,14 @@ def numeric_numeric(numeric, s, **kwargs):
         return Numeric(out_x, out_y, numeric.x_min, numeric.x_max, y_min, y_max, r, n)
 
 def numeric_file(x, y, name):
-    pass
+    with open(name, "w") as f:
+        f.write("[X]:\n")
+        for num in x:
+            f.write(str(num) + "\n")
+        f.write("[Y]:\n")
+        for num in y:
+            f.write(str(num) + "\n")
+        return f
 
 
 def file_numeric(name, s_mode):
@@ -93,7 +100,7 @@ Operations:
 Numeric ---> Numeric  (ex. scaling, corr. adj.)
 Numeric ---> File     (ex. generation, organization/labelling)
 File    ---> Numeric  (ex. data retrieval, statistics)
-File    ---> File     (ex. conversion, scaling, corr. adj)
+File    ---> File     (ex. file conversion, renaming)
 '''
 # GENERAL MODULE: INPUT
 op_str = input("Enter all operations delineated with vert bar: ")
@@ -149,7 +156,38 @@ for op in ops:
         cache.toString()
 
     elif "Numeric" in comps[0] and "File" in comps[1]:
-        pass
+        #Numeric(prev) --> File(baoissmart.txt)
+        #Numeric(prev OR [5, 3, 3], [4, 5, 6])
+        f_params = []
+        out_file = None
+        in_numeric = None
+        in_params = comps[0].split("(")[1].split(",")
+        out_params = comps[1].split("(")[1].rstrip(")")
+        print(out_params)
+        cursor = 0
+        if "prev" in in_params[0] and cache is not None:
+            in_numeric = cache
+            out_file = numeric_file(cache.x, cache.y, out_params)
+        else:
+            # X/Y PARSE
+            x = []
+            y = []
+            a = x
+            print(in_params)
+            for i in range(2):
+                while True:
+                    a.append(in_params[cursor].strip().removeprefix("[").rstrip("]").rstrip(")"))
+                    if "]" in in_params[cursor]:
+                        break
+                    cursor += 1
+                a = y
+                cursor += 1
+            for i in range(len(out_params)):
+                f_params.append(int(out_params[i].strip().rstrip(")")))
+            in_numeric = Numeric(x, y, 0, 0, 0, 0, 0, len(x))
+            out_file = numeric_file(in_numeric.x, in_numeric.y, out_params[0])
+        cache = out_file
+
     elif "File" in comps[0] and "Numeric" in comps[1]:
         out_file = None
         params = comps[0].split("(")[1].split(",")
