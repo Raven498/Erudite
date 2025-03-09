@@ -34,9 +34,9 @@ def numeric_numeric(numeric, **kwargs):
     r = kwargs.get("r")
     n = kwargs.get("n")
     s = kwargs.get("s")
-    if numeric.x == [""] and numeric.y == [""]:
+    if numeric.x == [] and numeric.y == []:
         for i in range(int(n)):
-            out_x.append(random.randint(x_min, x_max))
+            out_x.append(random.uniform(x_min, x_max))
             out_y.append((out_x[i] * r) + (
                     random.randint(y_min, y_max) * (1 - (r ** 2)) ** (1 / 2)))
         return Numeric(out_x, out_y, x_min, x_max, y_min, y_max, r, n)
@@ -105,7 +105,9 @@ def parseInputNumeric(params):
     cursor = 0
     for i in range(2):
         while True:
-            a.append(float(params[cursor].strip().removeprefix("[").rstrip(")").rstrip("]")))
+            num = params[cursor].strip().removeprefix("[").rstrip(")").rstrip("]")
+            if num != '':
+                a.append(float(num))
             if "]" in params[cursor]:
                 break
             cursor += 1
@@ -145,7 +147,7 @@ for op in ops:
         for i in range(len(out_params)):
             f_params.append(float(out_params[i].strip().rstrip(")")))
 
-        if in_numeric.x == [""] and in_numeric.y == [""]:
+        if in_numeric.x == [] and in_numeric.y == []:
             out_numeric = numeric_numeric(in_numeric,
                                           x_min=f_params[0],
                                           x_max=f_params[1],
@@ -168,13 +170,14 @@ for op in ops:
         out_file = None
         in_numeric = None
         in_params = comps[0].split("(")[1].split(",")
-        out_params = comps[1].split("(")[1].rstrip(")")
+        out_name = comps[1].split("(")[1].strip().rstrip(")")
+        print(out_name)
         cursor = 0
         if "prev" in in_params[0] and cache is not None:
             in_numeric = cache
         else:
             in_numeric = parseInputNumeric(in_params)
-        out_file = numeric_file(in_numeric, f_params[0])
+        out_file = numeric_file(in_numeric, out_name)
         cache = out_file
 
     elif "File" in comps[0] and "Numeric" in comps[1]:
@@ -190,7 +193,7 @@ for op in ops:
         in_name = comps[0].split("(")[1].strip().rstrip(")")
         out_name = comps[1].split("(")[1].strip().rstrip(")")
         out_file = None
-        if in_name[0] == "prev" and cache is not None:
+        if in_name == "prev" and cache is not None:
             in_name = os.path.basename(cache.name)
         out_file = file_file(in_name, out_name)
         cache = out_file
