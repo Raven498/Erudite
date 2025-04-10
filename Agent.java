@@ -28,7 +28,7 @@ public class Agent {
         //STAGE 1: INPUT PARSING (INPUT --> PARSED)
         String[] c_reg = content.split("///");
         for(String c : c_reg){
-            //if()
+
         }
 
         return algo;
@@ -128,7 +128,7 @@ public class Agent {
         return stdev;
     }
 
-    public State PRL(){
+    public State prl_learn(){
         boolean adjY = false;
         boolean xMode = false;
         ArrayList<Double> train_t = new ArrayList<>(); //training targets
@@ -264,4 +264,136 @@ public class Agent {
         System.out.println(index);
         return final_s;
     }
+
+    /*
+    POLICY METHODS NOTES:
+    All methods represent generalized policies for any state and reward space - theoretical policies will only take
+        state s as a parameter, with state space + learned rewards used internally in trained policies
+    Policy generalizations (normal convergence, periodic divergence) take additional state parameters beyond generalized
+    parameters of state/reward space - in practice, all states will be used for all state parameters during Q-value calculations
+     */
+
+    /*
+        Optimal Convergence Policy:
+        Converge to the state that provides maximum reward
+    */
+    public int optimal_convergence_policy(ArrayList<State> states, ArrayList<Double> rewards, State s){
+        /*
+        Find the state index producing max reward
+         */
+        double max = 0;
+        for(double r : rewards){
+            if(r > max){
+                max = r;
+            }
+        }
+        int max_index = rewards.indexOf(max);
+
+        /*
+        Return action depending on state index vs. optimal index
+         */
+        if(states.indexOf(s) < max_index){
+            return 1;
+        } else if(states.indexOf(s) > max_index){
+            return 0;
+        } else{
+            return 2;
+        }
+    }
+
+    /*
+        Normal Convergence Policy:
+        Converge to any given state
+        (Generalization of Optimal Convergence Policy)
+     */
+    public int normal_convergence_policy(ArrayList<State> states, ArrayList<Double> rewards, State s, State c){
+        /*
+        Return action depending on state index vs. converge index
+         */
+        if(states.indexOf(s) < states.indexOf(c)){
+            return 1;
+        } else if(states.indexOf(s) > states.indexOf(c)){
+            return 0;
+        } else{
+            return 2;
+        }
+    }
+
+    /*
+        Cyclical Divergence Policy:
+        Go to closest "end" of state space from starting state (s_1 or s_n), then oscillate infinitely between "end" state
+        and the state before.
+    */
+    public int cyclical_divergence_policy(ArrayList<State> states, State s){
+        int c = states.indexOf(s);
+        if(c < (states.size() - 1) - c){
+            return 0;
+        } else if(c > (states.size() - 1) - c){
+            return 1;
+        } else{
+            Random rand = new Random();
+            return rand.nextInt(2);
+        }
+    }
+
+    /*
+       Periodic Divergence Policy:
+       Go to closest "bound state" from starting state (s_L1 or s_L2), then oscillate infinitely between bound state and
+       the state before.
+    */
+    public int periodic_divergence_policy(ArrayList<State> states, State s, State L, State U){
+        int c = states.indexOf(s);
+        int L1 = states.indexOf(L);
+        int L2 = states.indexOf(U);
+        if(Math.abs(L1 - c) < L2 - c){
+            return 0;
+        } else if(Math.abs(L1 - c) > L2 - c){
+            return 1;
+        } else{
+            Random rand = new Random();
+            return rand.nextInt(2);
+        }
+    }
+
+    /*
+    PRL Demonstration for Discrete State Spaces (uses the reward function learned in prl_learn)
+    This method utilizes a rudimentary model to simulate model interactions, such as environmental
+    transitions, collecting reward, etc.
+        - Ground-truth model: MDP w/ ternary action space (left, right, stay), discrete state space (set of state vectors),
+        environmental transition function (left = previous state, right = next state), and a positive + linear reward function
+        - Current practical model used in this demonstration: ArrayList<State> (for state space), list index increment/decrement,
+        (for action space + env transition func), double[] (for learned reward function from prl_learn)
+
+    Action Space One-Hot Encoding:
+    0: Left
+    1: Right
+    2: Stay
+     */
+    //Assume all states are initialized with targets and features
+    public void prl_interact(ArrayList<State> states, double[] learned_reward){
+        ArrayList<Double> rewards = new ArrayList<>();
+        double max = 0;
+        for(State s : states){
+            double r = (learned_reward[0] * s.getTarget()) + learned_reward[1];
+            rewards.add(r);
+            if(r > max){
+                max = r;
+            }
+        }
+
+        /*
+        Generalized Demonstration:
+        Test Optimal Convergence Policy against:
+            - Normal Convergence Policy
+            - Cyclical Divergence Policy
+            - Periodic Divergence Policy
+        by measuring return across all states
+        Goal: Prove that only the Optimal Convergence Policy maximizes return
+        */
+        
+        
+
+    }
+
+
 }
