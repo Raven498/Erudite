@@ -8,7 +8,9 @@ public class Agent {
     public enum KClasses{
         RELATIONSHIP,
         POLICY,
-        ALGORITHM
+        ALGORITHM,
+        CONCEPT,
+        INSTANCE
     }
     KnowledgeBase trueKB;
     KnowledgeBase approxKB;
@@ -36,13 +38,12 @@ public class Agent {
 
     //Mainloop method
     public void cycle(){
-        accumulate();
+        //accumulate();
         //(PRL SIM NEXT BEFORE INTERACTION)
-        /*
-        FEED PREPARED STATE-REWARD TRAJECTORY DATA TO PRL ALGORITHM
-        (INTERACTION WILL INVOLVE SYSTEMATIC ITERATION OF STATES TO CREATE TRAJ)
-         */
-        interact();
+        prl_interact(states, new double[] {1.8, 0});
+        //this.states = states;
+        //q_train(1000, 99);
+        //q_eval(1, 50);
     }
 
     public void accumulate(){
@@ -57,6 +58,8 @@ public class Agent {
 
     //Interaction Phase
     public void interact(){
+
+        ArrayList<State> states = new ArrayList<>();
 
     }
 
@@ -345,13 +348,14 @@ public class Agent {
         int c = states.indexOf(s);
         int L1 = states.indexOf(L);
         int L2 = states.indexOf(U);
-        if(Math.abs(L1 - c) < L2 - c){
+        int T = (Math.abs(L1 - c) < L2 - c) ? L1 : L2;
+
+        if(c > T){
             return 0;
-        } else if(Math.abs(L1 - c) > L2 - c){
-            return 1;
+        } else if(c == T){
+            return (T == L1) ? 1 : 0;
         } else{
-            Random rand = new Random();
-            return rand.nextInt(2);
+            return 1;
         }
     }
 
@@ -369,12 +373,27 @@ public class Agent {
     1: Right
     2: Stay
      */
+
+    public double reward(double[] r_func, State s){
+        return (r_func[0] * s.getTarget()) + r_func[1];
+    }
+
+    public int transition(ArrayList<State> states, int c, int action){
+        if(action == 0 && c > 0){
+            return c - 1;
+        } else if(action == 1 && c < states.size() - 1){
+            return c + 1;
+        } else{
+            return c;
+        }
+    }
+
     //Assume all states are initialized with targets and features
     public void prl_interact(ArrayList<State> states, double[] learned_reward){
         ArrayList<Double> rewards = new ArrayList<>();
         double max = 0;
         for(State s : states){
-            double r = (learned_reward[0] * s.getTarget()) + learned_reward[1];
+            double r = reward(learned_reward, s);
             rewards.add(r);
             if(r > max){
                 max = r;
@@ -390,9 +409,190 @@ public class Agent {
         by measuring return across all states
         Goal: Prove that only the Optimal Convergence Policy maximizes return
         */
-        
-        
+/*
+        //Optimal Convergence Demo
+        double q;
+        double g = 0.9;
+        for(State s : states){ //s = start state
+            //Every action in action space
+            for(int i = 0; i < 3; i++){
+                int c = states.indexOf(s);
+                System.out.println("-------C = " + c + ", A = " + i + "-------");
+                ArrayList<Double> q_values = new ArrayList<>();
+                ArrayList<String> log = new ArrayList<>();
+                log.add("START STATE: " + c + "|");
+                c = transition(states, c, i);
+                q = reward(learned_reward, s) + (g * reward(learned_reward, states.get(c)));
+                log.add("ARBIT TRANS: " + c + ", Q VAL: " + q + "|");
+                int n = 2;
+                int prev_c = -2;
+                while(prev_c != c){
+                    prev_c = c;
+                    c = transition(states, c, optimal_convergence_policy(states, rewards, states.get(c)));
+                    q += (Math.pow(g, n)) * reward(learned_reward, states.get(c));
+                    n += 1;
+                    log.add("TRANS: " + c + ", Q VAL: " + q + "|");
+                }
+                double sum = ((Math.pow(g, n)) * reward(learned_reward, states.get(c))) / (1 - g);
+                q_values.add(q + sum);
+                log.add("CONVERGE: " + c + ", Q VAL: " + (q + sum) + "|");
+                System.out.println("Q-VALs: ----> " + q_values);
+                System.out.println(log);
+            }
+        }
 
+
+ */
+        //Periodic Convergence Demo
+        double q;
+        double g = 0.9;
+        for(State s : states){ //s = start state
+            //Every action in action space
+            for(int i = 0; i < 3; i++){
+                int c = states.indexOf(s);
+                System.out.println("-------C = " + c + ", A = " + i + "-------");
+                ArrayList<Double> q_values = new ArrayList<>();
+                ArrayList<String> log = new ArrayList<>();
+                log.add("START STATE: " + c + "|");
+                c = transition(states, c, i);
+                q = reward(learned_reward, s) + (g * reward(learned_reward, states.get(c)));
+                log.add("ARBIT TRANS: " + c + ", Q VAL: " + q + "|");
+                int n = 2;
+                double sum;
+                while(true){
+                    c = transition(states, c, periodic_divergence_policy(states, states.get(c), states.get(3), states.get(12)));
+                    log.add("TRANS: " + c + ", Q VAL: " + q + "|");
+                    if(c == 3 || c == 4){
+                        sum = (((Math.pow(g, n)) * reward(learned_reward, states.get(3))) / (1 - g))
+                                + ((Math.pow(g, n) * reward(learned_reward, states.get(4))) / (1 - g));
+                        break;
+                    } else if(c == 12 || c == 11){
+                        sum = (((Math.pow(g, n)) * reward(learned_reward, states.get(12))) / (1 - g))
+                                + ((Math.pow(g, n) * reward(learned_reward, states.get(11))) / (1 - g));
+                        break;
+                    }
+                    q += (Math.pow(g, n)) * reward(learned_reward, states.get(c));
+                    n += 1;
+                }
+                q_values.add(q + sum);
+                log.add("END STATE: " + c + ", Q VAL: " + (q + sum) + "|");
+                System.out.println("Q-VALs: ----> " + q_values);
+                System.out.println(log);
+            }
+        }
+    }
+
+
+    /*
+    Q-Learning Demo (control comparison to PRL Demo)
+     */
+    private ArrayList<ArrayList<Double>> q_table = new ArrayList<>();
+    private ArrayList<State> states;
+    private double epsilon = 1;
+    public int greedy(State state){
+        return q_table.get(states.indexOf(state)).indexOf(max(state));
+    }
+    public double lookup(State state, int action){
+        return q_table.get(states.indexOf(state)).get(action);
+    }
+
+    public void update(State state, int action, double q_value){
+        q_table.get(states.indexOf(state)).set(action, q_value);
+    }
+
+    public double max(State state){
+        double max_q_value = 0.0;
+        ArrayList<Double> q_values = q_table.get(states.indexOf(state));
+        for(double q_value : q_values){
+            if(q_value >= max_q_value){
+                max_q_value = q_value;
+            }
+        }
+        return max_q_value;
+    }
+
+    public int epsilon(State state){
+        double num = Math.random();
+        int action = 0;
+        if(num > epsilon){
+            greedy(state);
+        } else{
+            Random random = new Random();
+            action = random.nextInt(3);
+        }
+        return action;
+    }
+
+    public void q_train(int episodes, int steps){
+        double learning_rate = 0.7;
+        double discount_rate = 0.95;
+        double max_epsilon = 1.0;
+        double min_epsilon = 0.05;
+        //Init Q Table
+        for(State state : states){
+            q_table.add(new ArrayList<>(Arrays.asList(0.0, 0.0, 0.0)));
+        }
+
+        for(int i = 0; i < episodes; i++){
+            State curr_state = states.get(0);
+            epsilon -= (max_epsilon - min_epsilon) / episodes;
+            for(int j = 0; j < steps; j++){
+                int chosen_action = epsilon(curr_state);
+                State new_state = states.get(transition(states, states.indexOf(curr_state), chosen_action));
+                double reward = reward(new_state);
+                double q_value = ((1 - learning_rate) * lookup(curr_state, chosen_action)) + (learning_rate * reward) + (learning_rate * discount_rate * max(new_state));
+                update(curr_state, chosen_action, q_value);
+                /*
+                if(new_state == states.get(states.size() - 1)){
+                    break;
+                }
+                 */
+                curr_state = new_state;
+            }
+        }
+
+        for(int i = 0; i < q_table.size(); i++){
+            System.out.println("---> STATE: " + i + " with T = " + states.get(i).getTarget() + ", R = " + reward(states.get(i)));
+            for(int j = 0; j < q_table.get(i).size(); j++){
+                System.out.println("------> ACTION: " + j + " with Q = " + q_table.get(i).get(j));
+            }
+        }
+    }
+
+    public void q_eval(int episodes, int steps){
+        State curr_state;
+        double gamma = 0.9;
+        for(int i = 0; i < episodes; i++){
+            System.out.println("------------------------------- EPISODE " + i + " -------------------------------");
+            curr_state = states.get(0);
+            double q = 0;
+            for(int j = 0; j < steps; j++){
+                System.out.println("-----> STEP " + j + " <-----");
+                int chosen_action = greedy(curr_state);
+                State new_state = states.get(transition(states, states.indexOf(curr_state), chosen_action));
+                double r = reward(new_state);
+                q += (Math.pow(gamma, j)) * r;
+                System.out.println("CURR STATE: " + states.indexOf(curr_state));
+                System.out.println("ACTION: " + chosen_action);
+                System.out.println("NEW STATE: " + states.indexOf(new_state));
+                System.out.println("REWARD: " + r);
+                System.out.println("TOTAL RETURN SO FAR: " + q);
+                curr_state = new_state;
+            }
+            System.out.println("TOTAL Q FOR EPISODE: " + q);
+        }
+
+        /*
+        double mean = (double) total_rewards / episodes;
+        double total_r_sq_diff = 0;
+        for(int r : rewards){
+            total_r_sq_diff += Math.pow(r - mean, 2);
+        }
+        double stdev = total_r_sq_diff / rewards.size();
+        System.out.println(reach_steps_avg);
+        reach_steps_avg /= (episodes * eval_steps);
+        return new double[]{mean, stdev, reach_steps_avg};
+         */
     }
 
 
