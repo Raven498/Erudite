@@ -10,7 +10,8 @@ public class Agent {
         POLICY,
         ALGORITHM,
         CONCEPT,
-        INSTANCE
+        INSTANCE,
+        STATE
     }
     KnowledgeBase trueKB;
     KnowledgeBase approxKB;
@@ -58,8 +59,6 @@ public class Agent {
 
     //Interaction Phase
     public void interact(){
-
-        ArrayList<State> states = new ArrayList<>();
 
     }
 
