@@ -24,6 +24,8 @@ public class Agent {
     TKB input content parsing algorithm
     May be different depending on environment type
      */
+
+    /*
     public Algorithm parseAlgo(String name, String content){
         Algorithm algo = new Algorithm(name, content, KClasses.ALGORITHM);
         algo.name = name;
@@ -36,12 +38,13 @@ public class Agent {
 
         return algo;
     }
+     */
 
     //Mainloop method
     public void cycle(){
-        //accumulate();
+        accumulate();
         //(PRL SIM NEXT BEFORE INTERACTION)
-        prl_interact(states, new double[] {1.8, 0});
+        //prl_interact(states, new double[] {1.8, 0});
         //this.states = states;
         //q_train(1000, 99);
         //q_eval(1, 50);
@@ -68,15 +71,28 @@ public class Agent {
     public Environment approx(Environment true_env){
         Environment approx_env = new Environment();
         for(Knowledge k : true_env.getKnowledge()){
-            if(k.kclass == KClasses.POLICY){
-
-            }
-            if(k.kclass == KClasses.RELATIONSHIP){
-
-            }
-            if(k.kclass == KClasses.ALGORITHM){
-                Algorithm k_a = parseAlgo(k.name, k.content);
-                approx_env.addKnowledge(k_a);
+            Knowledge k_a;
+            switch(k.kclass){
+                case KClasses.POLICY:
+                    break;
+                case KClasses.RELATIONSHIP:
+                    break;
+                case KClasses.ALGORITHM:
+                    k_a = k;
+                    approx_env.addKnowledge(k_a);
+                    break;
+                case KClasses.CONCEPT:
+                    k_a = k;
+                    approx_env.addKnowledge(k_a);
+                    break;
+                case KClasses.INSTANCE:
+                    k_a = k;
+                    approx_env.addKnowledge(k_a);
+                    break;
+                case KClasses.STATE:
+                    k_a = k;
+                    approx_env.addKnowledge(k_a);
+                    break;
             }
         }
         return approx_env;

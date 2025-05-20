@@ -18,8 +18,9 @@ public class Main {
 
         for(int i = 0; i < 20; i++){
             Random r = new Random();
-            GenState g = new GenState(
+            Knowledge g = new GenState("STATE " + i, "I LOVE VALLIUM", Agent.KClasses.STATE, "ALGO-POWER",
                     new Instance(k, new ArrayList<>(Arrays.asList(r.nextInt(10), "x", r.nextInt(10)))));
+            env.addKnowledge(g);
         }
 
         //REAL TKB ENV_SET (EXTRACTION FROM SQLITE DB)
