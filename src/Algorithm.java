@@ -7,9 +7,9 @@ public class Algorithm extends Knowledge {
     public ArrayList<String> actions;
     public ArrayList<Object> parameters;
 
-    public TrainEnv train_env;
+    public RewardHandler train_env;
 
-    public Algorithm(String name, String content, Agent.KClasses kclass, Concept input, Concept output, ArrayList<String> outputs, ArrayList<String> actions, ArrayList<Object> parameters, TrainEnv train_env) {
+    public Algorithm(String name, String content, Agent.KClasses kclass, Concept input, Concept output, ArrayList<String> outputs, ArrayList<String> actions, ArrayList<Object> parameters, RewardHandler train_env) {
         super(name, content, kclass);
         this.input = input;
         this.output = output;
