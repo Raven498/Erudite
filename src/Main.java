@@ -13,10 +13,10 @@ public class Main {
                 Arrays.asList("a", "x", "n") //(NOTE: attr labels should be autopopulated by parsing content field)
         ));
 
-        ArrayList<String> out = new ArrayList(Arrays.asList(
-                "O.a",
-                "O.x",
-                "O.n"
+        ArrayList<Object> out = new ArrayList<>(Arrays.asList(
+                "a",
+                "x",
+                "n"
         ));
         ArrayList<String> acts = new ArrayList<>(Arrays.asList(
                 "MULT",
@@ -46,8 +46,8 @@ public class Main {
                     new Instance(k, new ArrayList<>(Arrays.asList(r.nextInt(10), "x", r.nextInt(10)))));
             env.addKnowledge(g);
         }
-
-        Algorithm a = new Algorithm("POWER", "O.a = I.a * I.n, O.x = I.x, O.n = I.n - 1", Agent.KClasses.ALGORITHM, k, k, out, acts, param, ts);
+        RewardHandler rh = new RewardHandler(50, 25, k, "a", "3", "a", "a");
+        Algorithm a = new Algorithm("POWER", "O.a = I.a * I.n, O.x = I.x, O.n = I.n - 1", Agent.KClasses.ALGORITHM, k, k, out, acts, param, ts, rh);
 
         env.addKnowledge(k);
         env.addKnowledge(a);
