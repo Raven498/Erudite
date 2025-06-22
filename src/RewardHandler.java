@@ -44,10 +44,8 @@ public class RewardHandler {
         1) the target condition is true
         2) the transform condition is false (the agent did not conduct target transform)
          */
-        int target_index = this.c.attr_labels.indexOf(attr);
-        int transform_index_o = this.c.attr_labels.indexOf(a2); //NEED TO ADD OUTPUT CONCEPT
-        int transform_index_i = this.c.attr_labels.indexOf(a1);
-        if(c.f.values.get(target_index) == v && a.f.values.get(transform_index_o) != c.f.values.get(transform_index_i)){
+        //TODO: NEED TO ADD OUTPUT CONCEPT
+        if(c.f.getValue(attr).equals(v) && !a.f.getValue(a2).equals(c.f.getValue(a1))){
             return r_n;
         }
         return r_y; //In all other conditions, the partial algorithm will guarantee correct reward

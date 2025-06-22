@@ -5,12 +5,12 @@ public class Algorithm extends Knowledge {
     public ArrayList<GenState> states;
     public Concept input;
     public Concept output;
-    public ArrayList<Object> outputs;
+    public ArrayList<String> outputs;
     public ArrayList<String> actions;
-    public ArrayList<Object> parameters;
+    public ArrayList<AlgoParameters> parameters;
     public RewardHandler rh;
 
-    public Algorithm(String name, String content, Agent.KClasses kclass, Concept input, Concept output, ArrayList<Object> outputs, ArrayList<String> actions, ArrayList<Object> parameters, ArrayList<GenState> states, RewardHandler rh) {
+    public Algorithm(String name, String content, Agent.KClasses kclass, Concept input, Concept output, ArrayList<String> outputs, ArrayList<String> actions, ArrayList<AlgoParameters> parameters, ArrayList<GenState> states, RewardHandler rh) {
         super(name, content, kclass);
         this.input = input;
         this.output = output;
@@ -21,15 +21,15 @@ public class Algorithm extends Knowledge {
         this.rh = rh;
     }
 
+    private AlgoParameters processAct(Instance i, String act, AlgoParameters params){
+        return ActionSpace.implement(act, new AlgoParameters(i.getValue(params.get(0).getStr())), new AlgoParameters(i.getValue(params.get(1).getStr())));
+    }
+
     public void executeAlgo(GenState s){
-        Instance o = new Instance(output, outputs);
-        ArrayList<ArrayList<Object>> AOVs = new ArrayList<>();
+        Instance o = new Instance(output);
         for(int i = 0; i < outputs.size(); i++){
-            ArrayList<Object> AOV = new ArrayList<>(Arrays.asList(
-                    outputs.get(i),
-                    actions.get(i),
-                    parameters.get(i)
-            ));
+            AlgoParameters v = processAct(s.f, actions.get(i), parameters.get(i));
+            o.addValue(outputs.get(i), v.getStr());
         }
     }
 

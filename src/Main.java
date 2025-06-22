@@ -1,5 +1,6 @@
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 import java.util.Random;
 
 public class Main {
@@ -13,28 +14,32 @@ public class Main {
                 Arrays.asList("a", "x", "n") //(NOTE: attr labels should be autopopulated by parsing content field)
         ));
 
-        ArrayList<Object> out = new ArrayList<>(Arrays.asList(
+        ArrayList<String> out = new ArrayList<>(Arrays.asList(
                 "a",
                 "x",
                 "n"
         ));
+
         ArrayList<String> acts = new ArrayList<>(Arrays.asList(
                 "MULT",
                 "ID",
                 "ADD"
         ));
 
-        ArrayList<Object> param = new ArrayList<>(Arrays.asList(
-                Arrays.asList(
-                        "I.a",
-                        "I.n"
-                ),
-                "I.x",
-                Arrays.asList(
-                        "I.n",
+        //Figure out way to clean up this syntax for readability
+        ArrayList<AlgoParameters> param = new ArrayList<>(Arrays.asList(
+                new AlgoParameters(Arrays.asList(
+                        new AlgoParameters("a"),
+                        new AlgoParameters("n")
+                )),
+                new AlgoParameters("x"),
+                new AlgoParameters(
                         Arrays.asList(
-                                "NEG",
-                                1
+                                new AlgoParameters("n"),
+                                new AlgoParameters(Arrays.asList(
+                                        new AlgoParameters("NEG"),
+                                        new AlgoParameters("1")
+                                ))
                         )
                 )
         ));
@@ -42,8 +47,11 @@ public class Main {
         ArrayList<GenState> ts = new ArrayList<>();
         for(int i = 0; i < 20; i++){
             Random r = new Random();
-            Knowledge g = new GenState("STATE " + i, "I LOVE VALLIUM", Agent.KClasses.STATE, "ALGO-POWER",
-                    new Instance(k, new ArrayList<>(Arrays.asList(r.nextInt(10), "x", r.nextInt(10)))));
+            GenState g = new GenState("STATE " + i, "I LOVE VALLIUM", Agent.KClasses.STATE, "ALGO-POWER",
+                    new Instance(k));
+            g.f.addValue("a", Integer.toString(r.nextInt(10)));
+            g.f.addValue("x", "x");
+            g.f.addValue("n", Integer.toString(r.nextInt(10)));
             env.addKnowledge(g);
         }
         RewardHandler rh = new RewardHandler(50, 25, k, "a", "3", "a", "a");

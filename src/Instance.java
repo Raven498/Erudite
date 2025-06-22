@@ -1,11 +1,20 @@
 import java.util.ArrayList;
 
-public class Instance {
+//Turn into Generic to support more datatypes
+public class Instance{
     public Concept c;
-    public ArrayList<Object> values = new ArrayList<>();
+    public String[] values;
 
-    public Instance(Concept c, ArrayList<Object> values){
+    public Instance(Concept c){
         this.c = c;
-        this.values = values;
+        this.values = new String[c.attr_labels.size()];
     }
+
+    public void addValue(String attr, String v){
+        values[c.attr_labels.indexOf(attr)] = v;
+    }
+    public String getValue(String attr){
+        return values[c.attr_labels.indexOf(attr)];
+    }
+
 }
