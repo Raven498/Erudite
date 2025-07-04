@@ -1,5 +1,6 @@
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 
 public class Algorithm extends Knowledge {
     public ArrayList<GenState> states;
@@ -22,28 +23,46 @@ public class Algorithm extends Knowledge {
     }
 
     private AlgoParameters processAct(Instance i, String act, AlgoParameters params){
+        var n = new ArrayList<AlgoParameters>();
+        /*
+        n = List<> //List of all unpacked parameters
+
+        process(params):
+        if(p.isList()){
+            for(AlgoParameters a : p){
+                if(!a.isList()){
+                    n.add(a);
+                    continue;
+                }
+                process(a);
+            }
+        }
+         */
         return ActionSpace.implement(act, new AlgoParameters(i.getValue(params.get(0).getStr())), new AlgoParameters(i.getValue(params.get(1).getStr())));
     }
 
-    public void executeAlgo(GenState s){
+    public Instance executeAlgo(GenState s){
         Instance o = new Instance(output);
         for(int i = 0; i < outputs.size(); i++){
             AlgoParameters v = processAct(s.f, actions.get(i), parameters.get(i));
             o.addValue(outputs.get(i), v.getStr());
         }
+        return o;
     }
 
     @Override
     public Algorithm approx(){
         Algorithm k_a = this;
-        //System.out.println("PENIS");
+
+        List<Double> rewards = new ArrayList<>();
+        System.out.println(states);
 
         //PARTIAL APPROX
         for(GenState s : states){
-            executeAlgo(s);
+            Instance action = executeAlgo(s);
+            rewards.add(rh.reward(s, new GenState(s.name + "-RESPONSE", "I STILL LOVE VALLIUM",  Agent.KClasses.STATE, s.prompt + "-RESPONSE", action)));
         }
-
-
+        System.out.println(rewards);
         return k_a;
     }
 }

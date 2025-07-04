@@ -52,8 +52,10 @@ public class Main {
             g.f.addValue("a", Integer.toString(r.nextInt(10)));
             g.f.addValue("x", "x");
             g.f.addValue("n", Integer.toString(r.nextInt(10)));
+            ts.add(g);
             env.addKnowledge(g);
         }
+        System.out.println("TS: " + ts);
         RewardHandler rh = new RewardHandler(50, 25, k, "a", "3", "a", "a");
         Algorithm a = new Algorithm("POWER", "O.a = I.a * I.n, O.x = I.x, O.n = I.n - 1", Agent.KClasses.ALGORITHM, k, k, out, acts, param, ts, rh);
 
