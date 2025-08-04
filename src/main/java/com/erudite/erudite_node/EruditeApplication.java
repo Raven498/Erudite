@@ -8,6 +8,7 @@ public class EruditeApplication {
 
 	public static void main(String[] args) {
 		SpringApplication.run(EruditeApplication.class, args);
+		Director.test_direct();
 	}
 
 }

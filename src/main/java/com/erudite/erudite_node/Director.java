@@ -1,11 +1,28 @@
 package com.erudite.erudite_node;
+
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.List;
 import java.util.Random;
 
-public class Main {
-    public void run(){
+/**
+ * The Director is responsible for determining the "needs" of this node based on currently accumulated knowledge,
+ * used & available memory/resources, etc, and orchestrating the appropriate actions as such. Primarily, it determines the
+ * pacing and order of training & interaction, as well as throttling training and interaction commands through an algorithm
+ * similar to the epsilon-greedy policy. It is also the only class that can send outgoing endpoint requests to external
+ * entities such as the Interface and other nodes.
+ * TODO: Revise this shitty explanation of what the Director does
+ */
+public class Director {
+
+    private static void train(){
+
+    }
+
+    public static void direct(){
+
+    }
+
+    public static void test_direct(){
         KnowledgeBase tkb = new KnowledgeBase();
 
         //TEST TKB ENV_SET
@@ -70,4 +87,5 @@ public class Main {
         Agent agent = new Agent(tkb);
         agent.cycle();
     }
+
 }
