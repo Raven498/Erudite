@@ -1,4 +1,7 @@
-package com.erudite.erudite_node;
+package com.erudite.erudite_node.management;
+
+import com.erudite.erudite_node.model.*;
+import com.erudite.erudite_node.service.Agent;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -14,10 +17,23 @@ import java.util.Random;
  */
 public class Director {
 
-    private static void train(){
+    private static void initEnv(){
 
     }
 
+/*
+FORMAL ARCHITECTURE FOR DIRECTOR:
+EPSILON MANAGER: Orchestrates and regulates pacing/order of accumulation vs interaction FOR ALL ENVIRONMENTS of a TKB
+    Description: Orchestrates accumulation or interaction processes nondeterministically, monitors size of AKB & used memory/resources to manage processes' relative execution probabilities and orchestrates
+    other appropriate knowledge/memory management actions
+ACCUMULATION MANAGER: Orchestrates and regulates accumulation processes to meet AKB requirements it defines, tracks information about the AKB (manages it for all environments)
+    Description: Creates and kicks off an accumulation process and acts as an interface for all AKB information. In director context, tracks and balances the relative approx percentage distribution across all
+    k types and communicates with Epsilon Manager to find respective Epsilon process managing its accumulation process and get sufficient accumulation space for balancing distributions & meeting any other defined
+    AKB requirements
+INTERACTION MANAGER: Orchestrates and regulates interaction processes to meet interaction requirements it defines, tracks information about all environment interactions
+    Description: Creates and kicks off an interaction process and acts as an interface for all interaction information. Communicates with Epsilon Manager to find respective Epsilon process managing its interaction
+    process and get sufficient accumulation space for meeting any defined interaction requirements
+*/
     public static void direct(){
 
     }

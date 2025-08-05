@@ -1,4 +1,4 @@
-package com.erudite.erudite_node;
+package com.erudite.erudite_node.model;
 public class Goal {
     public String action;
     public double[] output;

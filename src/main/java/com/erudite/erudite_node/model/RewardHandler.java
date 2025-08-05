@@ -1,4 +1,4 @@
-package com.erudite.erudite_node;
+package com.erudite.erudite_node.model;
 /*
 Multiple improvements needed to fully generalize this class:
 1. Create an internal parsing system for applying other boolean operators on target & transform conditions

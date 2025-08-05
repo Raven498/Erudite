@@ -1,5 +1,4 @@
-package com.erudite.erudite_node;
-import java.util.ArrayList;
+package com.erudite.erudite_node.model;
 
 //Turn into Generic to support more datatypes
 public class Instance{

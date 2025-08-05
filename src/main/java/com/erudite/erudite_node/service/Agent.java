@@ -1,4 +1,10 @@
-package com.erudite.erudite_node;
+package com.erudite.erudite_node.service;
+import com.erudite.erudite_node.model.KnowledgeBase;
+import com.erudite.erudite_node.model.Environment;
+import com.erudite.erudite_node.model.Goal;
+import com.erudite.erudite_node.model.Knowledge;
+import com.erudite.erudite_node.model.State;
+
 import java.io.File;  // Import the File class
 import java.io.FileNotFoundException;  // Import this class to handle errors
 import java.util.ArrayList;

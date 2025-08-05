@@ -1,5 +1,4 @@
-package com.erudite.erudite_node;
-import java.util.ArrayList;
+package com.erudite.erudite_node.model;
 import java.util.List;
 
 public class AlgoParameters{

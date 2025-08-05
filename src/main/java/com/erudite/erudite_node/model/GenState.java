@@ -1,4 +1,5 @@
-package com.erudite.erudite_node;
+package com.erudite.erudite_node.model;
+
 public class GenState{
     public String prompt;
     public Instance f;

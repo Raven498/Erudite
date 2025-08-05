@@ -1,4 +1,7 @@
-package com.erudite.erudite_node;
+package com.erudite.erudite_node.model;
+
+import com.erudite.erudite_node.service.Agent;
+
 //Could contain meta-knowledge
 public class Knowledge implements Approximation {
     protected Agent.KClasses kclass;

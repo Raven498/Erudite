@@ -1,5 +1,5 @@
-package com.erudite.erudite_node;
-import java.util.ArrayList;
+package com.erudite.erudite_node.model;
+import com.erudite.erudite_node.service.Agent;
 
 //Currently only models univariate relationships
 

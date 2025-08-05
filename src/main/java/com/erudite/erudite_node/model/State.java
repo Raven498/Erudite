@@ -1,4 +1,4 @@
-package com.erudite.erudite_node;
+package com.erudite.erudite_node.model;
 public class State {
     private double target;
     private double feature;

@@ -1,7 +1,8 @@
-package com.erudite.erudite_node;
+package com.erudite.erudite_node.model;
+
+import com.erudite.erudite_node.service.Agent;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 
 public class Algorithm extends Knowledge {
     public ArrayList<GenState> states;
