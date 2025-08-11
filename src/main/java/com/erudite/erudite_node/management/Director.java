@@ -16,8 +16,12 @@ import java.util.Random;
  * TODO: Revise this shitty explanation of what the Director does
  */
 public class Director {
+    public static KnowledgeBase tkb;
 
     private static void initEnv(){
+        // Call endpoint on env interface for getting env context - name, id, etc.
+
+        // Create, populate, Environment model and add to a TKB if not initialized yet
 
     }
 
@@ -33,9 +37,31 @@ ACCUMULATION MANAGER: Orchestrates and regulates accumulation processes to meet 
 INTERACTION MANAGER: Orchestrates and regulates interaction processes to meet interaction requirements it defines, tracks information about all environment interactions
     Description: Creates and kicks off an interaction process and acts as an interface for all interaction information. Communicates with Epsilon Manager to find respective Epsilon process managing its interaction
     process and get sufficient accumulation space for meeting any defined interaction requirements
+
+
+    Epsilon-greedy policy for training vs interaction:
+1. e = training probability
+2. e_i = 100%
+3. Use AKB size to throttle training prob (e = -mx, where x = AKB size)
+May need to do this for each env according to each env's AKB size
+4. Converse of e = interaction probability
+
+(This occurs per environment)
+Sample to decide training vs interaction
+If training: hit env interface endpoint for instance, algo, etc.
+How to orchestrate diff knowledge type approximations (during training)? // (what order should they be approxed in)?
+One option: approx according to rel approx percentage of each k type in AKB
+Rel approx % = # of k type approximations in AKB / # of total approximations in AKB (AKB size)
+"Balance" distribution of k type approximations so it reaches standard spec
+While training, need an algorithm that automatically adjusts the k type to be approxed to keep k type approx distribution balanced
+Will pick random k type initially & when distributions are balanced adequately
+Because this algorithm would work within the epsilon-greedy policy for training vs interaction, the algorithm may not consistently enforce specific reqs for each k type.
+To handle this, rel approx requirements must be estimated ranges for each k type - must check during epsilon-greedy if ranges have been exceeded/unfulfilled and if so, increase training prob appropriately to provide more opportunities to handle it
+Interactions MAY create new approximations - need to develop example cases where this could happen, but supporting this will involve either allowing interactive processes to increase training prob, or allowing them to directly create approx, letting epsilon-greedy manage any changes necessary to maintain distribution
+
 */
     public static void direct(){
-
+        // Generate environment
     }
 
     public static void test_direct(){
