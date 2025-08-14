@@ -60,7 +60,7 @@ public class Agent {
     public void accumulate(){
         KnowledgeBase akb = new KnowledgeBase();
         ArrayList<Environment> approx_env_set = new ArrayList<>();
-        for(Environment env : trueKB.getEnvSet()){
+        for(Environment env : trueKB.getEnvSet().values()){
             approx_env_set.add(approx(env));
         }
         akb.setEnvSet(approx_env_set);
@@ -88,6 +88,11 @@ public class Agent {
             approx_env.addKnowledge(k.approx());
         }
         return approx_env;
+    }
+
+    // TODO: change return type to Knowledge
+    public void approx(Knowledge k){
+
     }
 
     public double reward(State s){

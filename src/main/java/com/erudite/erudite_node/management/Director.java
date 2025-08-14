@@ -2,10 +2,12 @@ package com.erudite.erudite_node.management;
 
 import com.erudite.erudite_node.model.*;
 import com.erudite.erudite_node.service.Agent;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import okhttp3.*;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Random;
+import java.io.IOException;
+import java.util.*;
+import java.util.concurrent.TimeUnit;
 
 /**
  * The Director is responsible for determining the "needs" of this node based on currently accumulated knowledge,
@@ -16,14 +18,54 @@ import java.util.Random;
  * TODO: Revise this shitty explanation of what the Director does
  */
 public class Director {
+    private static double expansion_prob = 1.0;
     public static KnowledgeBase tkb;
 
-    private static void initEnv(){
-        // Call endpoint on env interface for getting env context - name, id, etc.
-
-        // Create, populate, Environment model and add to a TKB if not initialized yet
-
+    public static Environment initEnv() {
+        // Get context and populate into env object, whether via interface endpoint or custom logic
+        return new Environment();
     }
+
+    public static List<Knowledge> getTrueKnowledge() {  // 1 usage
+        // Hit endpoint, get true knowledge for the specific env topic
+        return new ArrayList<>();
+    }
+
+    public static InstanceTest getTrueInstance() throws IOException {
+        OkHttpClient client = new OkHttpClient.Builder().writeTimeout(20, TimeUnit.SECONDS).build();
+
+        Request request = new Request.Builder()
+                .url("http://localhost:8080/instance")
+                .addHeader("Content-Type", "application/json")
+                .get()
+                .build();
+
+        // Execute request and get response as JSON string
+        ResponseBody response = client.newCall(request).execute().body();
+        String responseJson = response.string();
+
+        ObjectMapper mapper = new ObjectMapper();
+
+        return mapper.readValue(responseJson, InstanceTest.class);
+    }
+
+    // This occurs per environment
+    public static void direct() {  // 0 usages
+        // Master epsilon
+        double s = Math.random();
+        if (s <= expansion_prob) {
+            // Init true env, add to TKB
+            var env = initEnv();
+            var envfactor = getTrueKnowledge();
+            env.addKnowledge(envfactor);
+            UUID true_env_id = UUID.randomUUID();
+            tkb.addEnv(true_env_id, env);
+            EpsilonManager.epsilon(true_env_id, envfactor);
+        } else {
+            InteractionManager.interact();
+        }
+    }
+
 
 /*
 FORMAL ARCHITECTURE FOR DIRECTOR:
@@ -60,9 +102,6 @@ To handle this, rel approx requirements must be estimated ranges for each k type
 Interactions MAY create new approximations - need to develop example cases where this could happen, but supporting this will involve either allowing interactive processes to increase training prob, or allowing them to directly create approx, letting epsilon-greedy manage any changes necessary to maintain distribution
 
 */
-    public static void direct(){
-        // Generate environment
-    }
 
     public static void test_direct(){
         KnowledgeBase tkb = new KnowledgeBase();
