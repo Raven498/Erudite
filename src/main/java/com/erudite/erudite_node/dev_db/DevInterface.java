@@ -17,7 +17,11 @@ public class DevInterface {
         return devRepo.findAll();
     }
 
-    public List<Pod> getPodsByIp(String ip){return devRepo.findByIp(ip);}
+    public List<Pod> getPodsByIp(String ip){
+        var pods = devRepo.findByIp(ip);
+        System.out.println(pods);
+        return pods;
+    }
     public void addPod(String ip){
         Pod pod = new Pod();
         pod.setIp(ip);

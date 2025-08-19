@@ -11,6 +11,6 @@ import java.util.List;
 @Repository
 public interface DevRepo extends JpaRepository<Pod, Long> {
 
-    @Query(value = "select p.ip from Pod p where p.ip = :ip")
+    @Query(value = "select p from Pod p where p.ip = :ip")
     List<Pod> findByIp(String ip);
 }
