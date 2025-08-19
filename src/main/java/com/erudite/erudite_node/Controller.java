@@ -28,4 +28,18 @@ public class Controller {
     public void getPods(){
         System.out.println(devInterface.getPods());
     }
+
+    /**
+     * This endpoint should only be called by the Kubernetes deployment if it decides to destroy this pod,
+     * via the preStop hook.
+     * Removes pod ip from the registry to handle pod removals
+     */
+    @GetMapping("/destroy")
+    public void destroy(){
+        String ip = System.getenv("POD_IP");
+        if(!devInterface.getPodsByIp(ip).isEmpty()){
+            // Delete from db
+            devInterface.deletePod(ip);
+        }
+    }
 }

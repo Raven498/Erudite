@@ -10,12 +10,14 @@ import org.springframework.stereotype.Component;
 public class NodeInitializer {
     @Autowired
     DevInterface devInterface;
+    String ip;
 
     @EventListener
     public void registerNode(ApplicationReadyEvent event){
-        if(devInterface.getPodsByIp("192.168.1.3").isEmpty()){
+        ip = System.getenv("POD_IP");
+        if(devInterface.getPodsByIp(ip).isEmpty()){
             // Write to db
-            devInterface.addPod("192.168.1.3");
+            devInterface.addPod(ip);
         }
     }
 }

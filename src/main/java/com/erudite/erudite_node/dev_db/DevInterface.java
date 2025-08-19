@@ -27,4 +27,9 @@ public class DevInterface {
         pod.setIp(ip);
         devRepo.save(pod);
     }
+
+    public void deletePod(String ip){
+        var pods = getPodsByIp(ip);
+        devRepo.deleteAllInBatch(pods);
+    }
 }
