@@ -5,6 +5,8 @@ import com.erudite.erudite_node.dev_db.DevRepo;
 import com.erudite.erudite_node.management.Director;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.io.IOException;
@@ -34,9 +36,10 @@ public class Controller {
      * via the preStop hook.
      * Removes pod ip from the registry to handle pod removals
      */
-    @GetMapping("/destroy")
-    public void destroy(){
-        String ip = System.getenv("POD_IP");
+    @GetMapping("/destroy/{ip}")
+    public void destroy(@PathVariable("ip") String ip){
+        // USE ONLY WITH K8S DEPLOYMENT
+        //String ip = System.getenv("POD_IP");
         if(!devInterface.getPodsByIp(ip).isEmpty()){
             // Delete from db
             devInterface.deletePod(ip);

@@ -10,11 +10,12 @@ import org.springframework.stereotype.Component;
 public class NodeInitializer {
     @Autowired
     DevInterface devInterface;
-    String ip;
+    String ip = "192.168.1.2";
 
     @EventListener
     public void registerNode(ApplicationReadyEvent event){
-        ip = System.getenv("POD_IP");
+        // USE ONLY WITH K8S DEPLOYMENT
+        //ip = System.getenv("POD_IP");
         if(devInterface.getPodsByIp(ip).isEmpty()){
             // Write to db
             devInterface.addPod(ip);
