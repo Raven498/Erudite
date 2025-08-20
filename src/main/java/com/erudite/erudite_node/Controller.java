@@ -2,14 +2,20 @@ package com.erudite.erudite_node;
 
 import com.erudite.erudite_node.dev_db.DevInterface;
 import com.erudite.erudite_node.dev_db.DevRepo;
+import com.erudite.erudite_node.dev_db.Pod;
 import com.erudite.erudite_node.management.Director;
+import com.erudite.erudite_node.model.InstanceTest;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import okhttp3.MediaType;
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
+import okhttp3.RequestBody;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.io.IOException;
+import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 @RestController
 public class Controller {
@@ -23,7 +29,32 @@ public class Controller {
 
     @GetMapping("/instanceTest")
     public void instanceTest() throws IOException {
-        System.out.println(Director.getTrueInstance());
+        InstanceTest instance = Director.getTrueInstance();
+        System.out.println(instance);
+    }
+
+    @PostMapping("/propagate")
+    public void propagate(@org.springframework.web.bind.annotation.RequestBody InstanceTest instance) throws IOException {
+        System.out.println(instance);
+
+        // CONDUCT TRANSFORM
+
+        // ASYNC PROPAGATION STEP 1 - SEND APPROX TO ALL OTHER NODES FROM NODE DISCOVERY
+        List<Pod> pods = devInterface.getPods();
+        for(Pod pod : pods){
+            OkHttpClient client = new OkHttpClient.Builder().writeTimeout(20, TimeUnit.SECONDS).build();
+            ObjectMapper mapper = new ObjectMapper();
+            String json = mapper.writeValueAsString(instance);
+
+            Request request = new Request.Builder()
+                    .url("http://" + pod.getIp() + ":8081/propagate")
+                    .addHeader("Content-Type", "application/json")
+                    .post(RequestBody.create(json, MediaType.get("application/json")))
+                    .build();
+
+            client.newCall(request).execute();
+        }
+
     }
 
     @GetMapping("/getPods")
