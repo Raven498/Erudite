@@ -9,9 +9,10 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import okhttp3.MediaType;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
-import okhttp3.RequestBody;
+import static okhttp3.RequestBody.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
+import static org.springframework.web.bind.annotation.RequestBody.*;
 
 import java.io.IOException;
 import java.util.List;
@@ -34,10 +35,11 @@ public class Controller {
     }
 
     @PostMapping("/propagate")
-    public void propagate(@org.springframework.web.bind.annotation.RequestBody InstanceTest instance) throws IOException {
+    public void propagate(@RequestBody InstanceTest instance) throws IOException {
         System.out.println(instance);
 
-        // CONDUCT TRANSFORM
+        // CONDUCT APPROXIMATION
+        instance.attrs().put("APPROXED", "true");
 
         // ASYNC PROPAGATION STEP 1 - SEND APPROX TO ALL OTHER NODES FROM NODE DISCOVERY
         List<Pod> pods = devInterface.getPods();
@@ -49,7 +51,7 @@ public class Controller {
             Request request = new Request.Builder()
                     .url("http://" + pod.getIp() + ":8081/propagate")
                     .addHeader("Content-Type", "application/json")
-                    .post(RequestBody.create(json, MediaType.get("application/json")))
+                    .post(create(json, MediaType.get("application/json")))
                     .build();
 
             client.newCall(request).execute();
