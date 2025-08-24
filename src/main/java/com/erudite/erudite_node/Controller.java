@@ -22,6 +22,7 @@ import java.util.concurrent.TimeUnit;
 public class Controller {
     @Autowired
     DevInterface devInterface;
+    int propCycle = 0;
 
     @GetMapping("/algoInfo")
     public AlgoInfo getAlgoInfo(){
@@ -36,27 +37,27 @@ public class Controller {
 
     @PostMapping("/propagate")
     public void propagate(@RequestBody InstanceTest instance) throws IOException {
-        System.out.println(instance);
+        System.out.println("INSTANCE INPUT FOR THIS PROPAGATE: " + instance); // TODO: print the ip here somehow
+        if(propCycle < 1){
+            List<Pod> pods = devInterface.getPods();
+            // CONDUCT APPROXIMATION
+            instance.attrs().put("APPROXED", "true");
+            for(Pod pod : pods){
+                OkHttpClient client = new OkHttpClient.Builder().writeTimeout(20, TimeUnit.SECONDS).build();
+                ObjectMapper mapper = new ObjectMapper();
+                String json = mapper.writeValueAsString(instance);
+                Request request = new Request.Builder()
+                        .url("http://" + pod.getIp() + ":8081/propagate")
+                        .addHeader("Content-Type", "application/json")
+                        .post(create(json, MediaType.get("application/json")))
+                        .build();
 
-        // CONDUCT APPROXIMATION
-        instance.attrs().put("APPROXED", "true");
-
-        // ASYNC PROPAGATION STEP 1 - SEND APPROX TO ALL OTHER NODES FROM NODE DISCOVERY
-        List<Pod> pods = devInterface.getPods();
-        for(Pod pod : pods){
-            OkHttpClient client = new OkHttpClient.Builder().writeTimeout(20, TimeUnit.SECONDS).build();
-            ObjectMapper mapper = new ObjectMapper();
-            String json = mapper.writeValueAsString(instance);
-
-            Request request = new Request.Builder()
-                    .url("http://" + pod.getIp() + ":8081/propagate")
-                    .addHeader("Content-Type", "application/json")
-                    .post(create(json, MediaType.get("application/json")))
-                    .build();
-
-            client.newCall(request).execute();
+                client.newCall(request).execute();
+            }
+            propCycle += 1;
+        } else{
+            System.out.println("CYCLE LIMIT REACHED"); // TODO: print the ip here somehow
         }
-
     }
 
     @GetMapping("/getPods")
