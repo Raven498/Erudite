@@ -32,12 +32,14 @@ public class Controller {
     @GetMapping("/instanceTest")
     public void instanceTest() throws IOException {
         InstanceTest instance = Director.getTrueInstance();
+        propagate(instance, true);
         System.out.println(instance);
     }
 
-    @PostMapping("/propagate")
-    public void propagate(@RequestBody InstanceTest instance) throws IOException {
+    @PostMapping("/propagate/{isApproxNode}")
+    public void propagate(@RequestBody InstanceTest instance, @PathVariable("isApproxNode") boolean isApproxNode) throws IOException {
         System.out.println("INSTANCE INPUT FOR THIS PROPAGATE: " + instance); // TODO: print the ip here somehow
+        System.out.println("IS APPROX NODE: " + isApproxNode);
         if(propCycle < 1){
             List<Pod> pods = devInterface.getPods();
             // CONDUCT APPROXIMATION
@@ -47,7 +49,7 @@ public class Controller {
                 ObjectMapper mapper = new ObjectMapper();
                 String json = mapper.writeValueAsString(instance);
                 Request request = new Request.Builder()
-                        .url("http://" + pod.getIp() + ":8081/propagate")
+                        .url("http://" + pod.getIp() + ":8081/propagate/false")
                         .addHeader("Content-Type", "application/json")
                         .post(create(json, MediaType.get("application/json")))
                         .build();
@@ -57,6 +59,9 @@ public class Controller {
             propCycle += 1;
         } else{
             System.out.println("CYCLE LIMIT REACHED"); // TODO: print the ip here somehow
+            if(isApproxNode){
+                // TODO: Persist approx to DB
+            }
         }
     }
 
