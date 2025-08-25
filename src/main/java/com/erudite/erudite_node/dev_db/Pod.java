@@ -11,6 +11,9 @@ public class Pod {
     @Column(name="ip", nullable = false)
     private String ip;
 
+    @Column(name="approx")
+    private String approx;
+
     public String getIp(){
         return ip;
     }
@@ -18,4 +21,8 @@ public class Pod {
     public void setIp(String ip){
         this.ip = ip;
     }
+
+    public String getApprox(){return approx;}
+    
+    public void setApprox(String approx){this.approx = approx;}
 }

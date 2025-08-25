@@ -10,12 +10,15 @@ import okhttp3.MediaType;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import static okhttp3.RequestBody.*;
+
+import org.apache.catalina.core.ApplicationContext;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import static org.springframework.web.bind.annotation.RequestBody.*;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.Objects;
 import java.util.concurrent.TimeUnit;
 
 @RestController
@@ -23,6 +26,9 @@ public class Controller {
     @Autowired
     DevInterface devInterface;
     int propCycle = 0;
+
+    @Autowired
+    NodeInitializer nodeInit;
 
     @GetMapping("/algoInfo")
     public AlgoInfo getAlgoInfo(){
@@ -45,6 +51,9 @@ public class Controller {
             // CONDUCT APPROXIMATION
             instance.attrs().put("APPROXED", "true");
             for(Pod pod : pods){
+                if(Objects.equals(nodeInit.ip, pod.getIp())){
+                    continue;
+                }
                 OkHttpClient client = new OkHttpClient.Builder().writeTimeout(20, TimeUnit.SECONDS).build();
                 ObjectMapper mapper = new ObjectMapper();
                 String json = mapper.writeValueAsString(instance);
@@ -61,6 +70,7 @@ public class Controller {
             System.out.println("CYCLE LIMIT REACHED"); // TODO: print the ip here somehow
             if(isApproxNode){
                 // TODO: Persist approx to DB
+                System.out.println("IS APPROX NODE!!!");
             }
         }
     }
