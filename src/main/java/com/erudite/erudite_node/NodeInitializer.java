@@ -6,11 +6,18 @@ import org.springframework.boot.context.event.ApplicationReadyEvent;
 import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Component;
 
+import java.net.InetAddress;
+import java.net.UnknownHostException;
+
 @Component
 public class NodeInitializer {
     @Autowired
     DevInterface devInterface;
-    String ip = "192.168.1.2";
+    String ip;
+
+    public NodeInitializer() throws UnknownHostException {
+        ip = InetAddress.getLocalHost().getHostAddress();
+    }
 
     @EventListener
     public void registerNode(ApplicationReadyEvent event){

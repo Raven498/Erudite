@@ -17,6 +17,8 @@ import org.springframework.web.bind.annotation.*;
 import static org.springframework.web.bind.annotation.RequestBody.*;
 
 import java.io.IOException;
+import java.net.Inet4Address;
+import java.net.InetAddress;
 import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.TimeUnit;
@@ -38,10 +40,12 @@ public class Controller {
     @GetMapping("/instanceTest")
     public void instanceTest() throws IOException {
         InstanceTest instance = Director.getTrueInstance();
-        propagate(instance, true);
+        //propagate(instance, true);
         System.out.println(instance);
+        System.out.println("IP FOR THIS MACHINE: " + InetAddress.getLocalHost().getHostAddress());
     }
 
+    // UNTESTED
     @PostMapping("/propagate/{isApproxNode}")
     public void propagate(@RequestBody InstanceTest instance, @PathVariable("isApproxNode") boolean isApproxNode) throws IOException {
         System.out.println("INSTANCE INPUT FOR THIS PROPAGATE: " + instance); // TODO: print the ip here somehow
