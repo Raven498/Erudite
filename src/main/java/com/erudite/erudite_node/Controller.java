@@ -40,16 +40,16 @@ public class Controller {
     @GetMapping("/instanceTest")
     public void instanceTest() throws IOException {
         InstanceTest instance = Director.getTrueInstance();
-        //propagate(instance, true);
+        propagate(instance, true);
         System.out.println(instance);
         System.out.println("IP FOR THIS MACHINE: " + InetAddress.getLocalHost().getHostAddress());
     }
 
-    // UNTESTED
     @PostMapping("/propagate/{isApproxNode}")
-    public void propagate(@RequestBody InstanceTest instance, @PathVariable("isApproxNode") boolean isApproxNode) throws IOException {
+    public InstanceTest propagate(@RequestBody InstanceTest instance, @PathVariable("isApproxNode") boolean isApproxNode) throws IOException {
         System.out.println("INSTANCE INPUT FOR THIS PROPAGATE: " + instance); // TODO: print the ip here somehow
         System.out.println("IS APPROX NODE: " + isApproxNode);
+        System.out.println("PROP CYCLE: " + propCycle);
         if(propCycle < 1){
             List<Pod> pods = devInterface.getPods();
             // CONDUCT APPROXIMATION
@@ -58,16 +58,20 @@ public class Controller {
                 if(Objects.equals(nodeInit.ip, pod.getIp())){
                     continue;
                 }
-                OkHttpClient client = new OkHttpClient.Builder().writeTimeout(20, TimeUnit.SECONDS).build();
-                ObjectMapper mapper = new ObjectMapper();
-                String json = mapper.writeValueAsString(instance);
-                Request request = new Request.Builder()
-                        .url("http://" + pod.getIp() + ":8081/propagate/false")
-                        .addHeader("Content-Type", "application/json")
-                        .post(create(json, MediaType.get("application/json")))
-                        .build();
+                if(!isApproxNode){
+                    return instance;
+                } else{
+                    OkHttpClient client = new OkHttpClient.Builder().writeTimeout(20, TimeUnit.SECONDS).build();
+                    ObjectMapper mapper = new ObjectMapper();
+                    String json = mapper.writeValueAsString(instance);
+                    Request request = new Request.Builder()
+                            .url("http://" + pod.getIp() + ":8081/propagate/false")
+                            .addHeader("Content-Type", "application/json")
+                            .post(create(json, MediaType.get("application/json")))
+                            .build();
 
-                client.newCall(request).execute();
+                    client.newCall(request).execute();
+                }
             }
             propCycle += 1;
         } else{
@@ -76,7 +80,9 @@ public class Controller {
                 // TODO: Persist approx to DB
                 System.out.println("IS APPROX NODE!!!");
             }
+            propCycle = 0;
         }
+        return null;
     }
 
     @GetMapping("/getPods")
