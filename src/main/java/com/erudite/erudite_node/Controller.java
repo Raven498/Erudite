@@ -6,14 +6,16 @@ import com.erudite.erudite_node.dev_db.Pod;
 import com.erudite.erudite_node.management.Director;
 import com.erudite.erudite_node.model.InstanceTest;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import okhttp3.MediaType;
-import okhttp3.OkHttpClient;
-import okhttp3.Request;
+import okhttp3.*;
+
 import static okhttp3.RequestBody.*;
 
 import org.apache.catalina.core.ApplicationContext;
+import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.RequestBody;
+
 import static org.springframework.web.bind.annotation.RequestBody.*;
 
 import java.io.IOException;
@@ -27,6 +29,7 @@ import java.util.concurrent.TimeUnit;
 public class Controller {
     @Autowired
     DevInterface devInterface;
+
     int propCycle = 0;
 
     @Autowired
@@ -50,6 +53,7 @@ public class Controller {
     public void propagate(@RequestBody InstanceTest instance, @PathVariable("isApproxNode") boolean isApproxNode) throws IOException {
         System.out.println("INSTANCE INPUT FOR THIS PROPAGATE: " + instance); // TODO: print the ip here somehow
         System.out.println("IS APPROX NODE: " + isApproxNode);
+        System.out.println("PROP CYCLE: " + propCycle);
         if(propCycle < 1){
             List<Pod> pods = devInterface.getPods();
             // CONDUCT APPROXIMATION
