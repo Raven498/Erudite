@@ -36,4 +36,21 @@ the overall technical and network architecture used for running the Erudite netw
 include the actual learning algorithms needed to generate approximations by each agent. These are currently still in 
 isolated development via local scripts and will be added to this repo later on in other feature branches.
 
+### Technical Details
+The network (composed of Erudite agents) communicates with the "environment interface" (EI), which trains the network and 
+provides prompts and other contextual data for the network to use when solving specific problems or conducting 
+operations within its environment. For this implementation, the EI is a separate SpringBoot server that communicates with 
+both the Gemini LLM (via the Gemini API) and the Erudite network to construct training data and problems (using Gemini) 
+and send it to the network for processing. The interface communicates bidirectionally - it also, for example, receives 
+approximations from the network and passes them to Gemini for evaluation, which it then passes back to the agents. In 
+other words, the EI is the intermediary between Gemini and the network, with Gemini serving as the "teaching" system by: 
+1. Constructing training information and practice problems
+2. Continuously evaluating the network's performance
+3. Providing real-world prompts and contexts that require solutions from Erudite
+
+While the network serves as the "learning" system that:
+1. Uses Gemini training and evaluations to generalize to other contexts and environments
+2. Interacts correctly with outside environmental elements via Gemini
+3. Develops a cumulative knowledge base of approximations that accurately and completely fit patterns in the overall external environment
+
 See the README feature/async-propagation for more information about the specific work being done under this scope.
