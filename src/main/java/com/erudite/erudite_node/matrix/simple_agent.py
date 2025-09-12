@@ -139,8 +139,22 @@ def analyze():
     '''
 
     
-def corr_exp():
-    pass
+def corr_exp(outputs, inputs):
+    # Calculate diffs between all outputs to get final differentiation
+    # TODO: Need to identify each unique function and its derivative - how to do this with final diff list?
+        # Potential solution: Use relative percent change in output values to detect higher changes at points across all diff lists
+            # Wherever these spikes occur, that's where functions change
+            # Monitor each range for each function identified this way, and if each list only has 1 element, that's the final diff list
+            # Use final diff list to get derivative, calculate original function
+            # TODO: WRITE A SCRIPT TO TEST THIS
+    diffs = outputs.copy()
+    while len(set(diffs)) != 1:
+        for i in range(len(outputs)):
+            if i > 0:
+                diffs[i] = diffs[i] - diffs[i - 1]
+    
+    # Calculate function
+
 
 gen(100)
 analyze()
