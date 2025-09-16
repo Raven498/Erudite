@@ -156,13 +156,17 @@ def corr_exp(outputs, inputs):
     for i in range(len(outputs)):
         if i > 0 and outputs[i-1] != 0:
             rel_change.append(((outputs[i] - outputs[i-1]) / outputs[i-1]) * 100)
+    print("REL CHANGE: " + str(rel_change))
     j = 0
     print("TRUTH A: " + str(outputs))
     print("INPUT A: " + str(inputs))
     while len(set(diffs)) >= 5:
+        o_diffs = diffs.copy()
+        o = o_diffs[0]
         for i in range(len(diffs)): 
             if i > 0:
-                diffs[i] = diffs[i] - diffs[i-1]
+                diffs[i] = diffs[i] - o
+                o = o_diffs[i]
         if j < 3:
             print(diffs)
         j += 1
