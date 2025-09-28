@@ -1,8 +1,8 @@
+import math
 import random
 import matplotlib.pyplot as plt
 import numpy as np
-import sklearn
-from scipy.interpolate import CubicSpline
+
 import heapq
 class Monomial:
     a = 0
@@ -156,6 +156,7 @@ def corr_exp(outputs, inputs):
     print("REL CHANGE: " + str(rel_change))
     print("TRUTH A: " + str(outputs))
     print("INPUT A: " + str(inputs))
+    j = 0
     while len(set(diffs)) >= 10:
         o_diffs = diffs.copy()
         o = o_diffs[0]
@@ -163,20 +164,37 @@ def corr_exp(outputs, inputs):
             if i > 0:
                 diffs[i] = diffs[i] - o
                 o = o_diffs[i]
-        print("DIFFS IN PROGRESS: " + str(diffs))
+        j += 1
     print("BITCH: " + str(np.argsort(diffs)))
     # If any rel changes become undefined (ex. index zero, division by zero, etc.), these changes won't be added to rel change list
     # This creates index discrepancy between rel change, diff lists --> this counter is used to adjust for that.
-    undef_adjust_counter = 0
     for i in range(len(diffs)):
         if i > 0 and outputs[i-1] != 0:
             rel_change.append(((diffs[i] - diffs[i-1]) / diffs[i-1]) * 100)
         else:
-            undef_adjust_counter += 1
+            rel_change.append(False)
 
-    for n in np.argsort(diffs)[:-4]:
-        r = re
+    br = []
+    print(np.argsort(diffs)[-4:])
+    for n in np.argsort(diffs)[-4:]:
+        r = rel_change[n]
+        print(r)
+        if r != False and r >= 100:
+            br.append(inputs[n])
 
+    print("BITCH ASS BR: " + str(br))
+    print(j)
+
+    corrs = []
+    for b in br:
+        d = diffs[b+2]
+        corr = [d, 1]
+        for i in range(j-1):
+            corr[1] += 1
+            corr[0] /= corr[1]
+            print(corr)
+        corrs.append(corr)
+    print(corrs)
     print("TRUTH A: " + str(outputs))
     print("INPUT A: " + str(inputs))
     print("DIFFS: " + str(diffs))
@@ -184,11 +202,9 @@ def corr_exp(outputs, inputs):
     print("CUTOFF 1 REL CHANGE: " + str(rel_change[8]))
     print("CUTOFF 2 REL CHANGE: " + str(rel_change[28]))
     print(rel_change[8] == max(rel_change))
-    rel_change.append(0)
-    rel_change.append(0)
     plt.plot(np.array(inputs), np.array(rel_change))
     plt.show()
-    sort(rel_change)
+    return corrs
 gen(100)
 analyze()
 
