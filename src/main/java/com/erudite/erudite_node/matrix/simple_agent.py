@@ -153,23 +153,30 @@ def corr_exp(outputs, inputs):
     
     diffs = outputs.copy()
     rel_change = []
-    for i in range(len(outputs)):
-        if i > 0 and outputs[i-1] != 0:
-            rel_change.append(((outputs[i] - outputs[i-1]) / outputs[i-1]) * 100)
     print("REL CHANGE: " + str(rel_change))
-    j = 0
     print("TRUTH A: " + str(outputs))
     print("INPUT A: " + str(inputs))
-    while len(set(diffs)) >= 5:
+    while len(set(diffs)) >= 10:
         o_diffs = diffs.copy()
         o = o_diffs[0]
         for i in range(len(diffs)): 
             if i > 0:
                 diffs[i] = diffs[i] - o
                 o = o_diffs[i]
-        if j < 3:
-            print(diffs)
-        j += 1
+        print("DIFFS IN PROGRESS: " + str(diffs))
+    print("BITCH: " + str(np.argsort(diffs)))
+    # If any rel changes become undefined (ex. index zero, division by zero, etc.), these changes won't be added to rel change list
+    # This creates index discrepancy between rel change, diff lists --> this counter is used to adjust for that.
+    undef_adjust_counter = 0
+    for i in range(len(diffs)):
+        if i > 0 and outputs[i-1] != 0:
+            rel_change.append(((diffs[i] - diffs[i-1]) / diffs[i-1]) * 100)
+        else:
+            undef_adjust_counter += 1
+
+    for n in np.argsort(diffs)[:-4]:
+        r = re
+
     print("TRUTH A: " + str(outputs))
     print("INPUT A: " + str(inputs))
     print("DIFFS: " + str(diffs))
@@ -184,3 +191,14 @@ def corr_exp(outputs, inputs):
     sort(rel_change)
 gen(100)
 analyze()
+
+'''
+CORRELATION EXTRACTION ALGORITHM:
+1. Exit Condition for Diffs Extraction - Ideas:
+- First list with less than 10 unique elements
+- First list with >~90% of elements being equal to < 3 elements
+2. Extracting Breakpoint Indexes
+- Idea 1:
+    - Take last 5 indexes in argsort of diff list, compare with corresponding rel change indexes
+    - Only recognize indexes that are >~100% rel change as breakpoints
+'''
