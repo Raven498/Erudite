@@ -1,9 +1,6 @@
-import math
-import random
 import matplotlib.pyplot as plt
 import numpy as np
 
-import heapq
 class Monomial:
     a = 0
     x = ""
@@ -25,6 +22,18 @@ outputs = []
 ry = 100
 rn = 50
 rewards = []
+def optimal_policy2(mono):
+    a = 0
+    x = ""
+    n = 0
+    if mono.a < 10:
+        n = 3 * mono.a
+        a = mono.a * (3 * mono.a)
+    else:
+        n = 100 * mono.a
+        a = mono.a * (100 * mono.a)
+    x = mono.x
+    return Monomial(a, x, n)
 
 def optimal_policy(mono):
     a = 0
@@ -102,55 +111,10 @@ def analyze():
             #plt.plot(np.array(in_label_reg[j]), np.array(tru_label_reg[i]))
             #plt.show()
 
-    corr_exp(truth_a, input_a)
-    
-    '''
-    cs = CubicSpline(np.array(input_a), np.array(truth_a))
-    d = cs.derivative()(input_a)
-    print("D" + str(d))
-    
-    '''
-    '''
-    poly = sklearn.preprocessing.PolynomialFeatures(degree=2)
-    X_poly = poly.fit_transform(np.array(input_a).reshape(-1, 1))
+    corrs = get_corrs(truth_a, input_a)
 
-    poly.fit(X_poly, truth_a)
-    lin2 = sklearn.linear_model.LinearRegression()
-    lin2.fit(X_poly, truth_a)
-
-    plt.scatter(input_a, truth_a, color='blue')
-
-    plt.plot(input_a, lin2.predict(poly.fit_transform(np.array(input_a).reshape(-1, 1))), color='red')
-    plt.title('Linear Regression')
-    plt.xlabel('Temperature')
-    plt.ylabel('Pressure')
-
-    plt.show()
-    '''
-    
-    '''
-    Algorithm Draft for Corr Detection (with R vs I.a, I.x, I.n):
-    For each input attr:
-        Iterate through rewards:
-            If current reward is rn and previous reward is ry (reward switches from ry -> rn):
-                Save input attr value corresponding to previous reward
-                (Target condition = x <= i, where i = previous input attr value, x = label for input attr)
-                OR (Target condition = x < y, where y = current input attr value, x = label for input attr)
-
-    Need to investigate what happens when I.n follows different target conditions in optimal policy than I.a --> what will reward graphs be?
-    '''
-def sort(nums):
-   return heapq.heapify(nums.copy()) 
  
-def corr_exp(outputs, inputs):
-    # Calculate diffs between all outputs to get final differentiation
-    # TODO: Need to identify each unique function and its derivative - how to do this with final diff list?
-        # Potential solution: Use relative percent change in output values to detect higher changes at points across all diff lists
-            # Wherever these spikes occur, that's where functions change
-            # Monitor each range for each function identified this way, and if each list only has 1 element, that's the final diff list
-            # Use final diff list to get derivative, calculate original function
-            # TODO: WRITE A SCRIPT TO TEST THIS
-    
+def get_corrs(outputs, inputs):
     diffs = outputs.copy()
     rel_change = []
     print("REL CHANGE: " + str(rel_change))
@@ -165,9 +129,8 @@ def corr_exp(outputs, inputs):
                 diffs[i] = diffs[i] - o
                 o = o_diffs[i]
         j += 1
-    print("BITCH: " + str(np.argsort(diffs)))
-    # If any rel changes become undefined (ex. index zero, division by zero, etc.), these changes won't be added to rel change list
-    # This creates index discrepancy between rel change, diff lists --> this counter is used to adjust for that.
+    print("ARGSORT: " + str(np.argsort(diffs)))
+
     for i in range(len(diffs)):
         if i > 0 and outputs[i-1] != 0:
             rel_change.append(((diffs[i] - diffs[i-1]) / diffs[i-1]) * 100)
@@ -182,7 +145,7 @@ def corr_exp(outputs, inputs):
         if r != False and r >= 100:
             br.append(inputs[n])
 
-    print("BITCH ASS BR: " + str(br))
+    print("BR: " + str(br))
     print(j)
 
     corrs = []
@@ -205,16 +168,13 @@ def corr_exp(outputs, inputs):
     plt.plot(np.array(inputs), np.array(rel_change))
     plt.show()
     return corrs
+
 gen(100)
 analyze()
 
 '''
-CORRELATION EXTRACTION ALGORITHM:
-1. Exit Condition for Diffs Extraction - Ideas:
-- First list with less than 10 unique elements
-- First list with >~90% of elements being equal to < 3 elements
-2. Extracting Breakpoint Indexes
-- Idea 1:
-    - Take last 5 indexes in argsort of diff list, compare with corresponding rel change indexes
-    - Only recognize indexes that are >~100% rel change as breakpoints
+MOST MAJOR CONCERNS:
+1. Accounting for pre-existing base policy: How will this algorithm maximize efficiency by working off of a correct base policy?
+    - What about when the base policy is wrong?
+2. When input delta != 1: How to adjust index tracking across lists when the difference across test inputs != 1?
 '''
