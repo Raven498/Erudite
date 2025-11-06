@@ -22,13 +22,18 @@ public class Director {
     public static KnowledgeBase tkb;
 
     public static Environment initEnv() {
-        // Get context and populate into env object, whether via interface endpoint or custom logic
-        return new Environment();
+        Environment env = new Environment();
+        env.addKnowledge(getTrueKnowledge());
+        return env;
     }
 
-    public static List<Knowledge> getTrueKnowledge() {  // 1 usage
-        // Hit endpoint, get true knowledge for the specific env topic
-        return new ArrayList<>();
+    public static List<Knowledge> getTrueKnowledge() {
+        ArrayList<Knowledge> trueKnowledge = new ArrayList<>();
+        Instance instance = getTrueInstance();
+        if(instance != null){
+            trueKnowledge.add(instance);
+        }
+        return trueKnowledge;
     }
 
     public static InstanceTest getTrueInstanceTest() throws IOException {
@@ -46,11 +51,10 @@ public class Director {
 
         ObjectMapper mapper = new ObjectMapper();
 
-        InstanceTest instanceTest = mapper.readValue(responseJson, InstanceTest.class);
-        return instanceTest;
+        return mapper.readValue(responseJson, InstanceTest.class);
     }
 
-    public static Instance getTrueInstance() throws IOException {
+    public static Instance getTrueInstance()  {
         OkHttpClient client = new OkHttpClient.Builder().writeTimeout(20, TimeUnit.SECONDS).build();
 
         Request request = new Request.Builder()
@@ -60,15 +64,20 @@ public class Director {
                 .build();
 
         // Execute request and get response as JSON string
-        ResponseBody response = client.newCall(request).execute().body();
-        String responseJson = response.string();
+        try{
+            ResponseBody response = client.newCall(request).execute().body();
+            String responseJson = response.string();
 
-        ObjectMapper mapper = new ObjectMapper();
+            ObjectMapper mapper = new ObjectMapper();
 
-        InstanceTest instanceTest = mapper.readValue(responseJson, InstanceTest.class);
-        Instance instance = new Instance();
-        instance.convertFromTest(instanceTest);
-        return instance;
+            InstanceTest instanceTest = mapper.readValue(responseJson, InstanceTest.class);
+            Instance instance = new Instance();
+            instance.convertFromTest(instanceTest);
+            return instance;
+        } catch(Exception e){
+            e.printStackTrace();
+            return null;
+        }
     }
 
     public static void direct() {
@@ -77,11 +86,9 @@ public class Director {
         if (s <= expansion_prob) {
             // Init true env, add to TKB
             var env = initEnv();
-            var envfactor = getTrueKnowledge();
-            env.addKnowledge(envfactor);
             UUID true_env_id = UUID.randomUUID();
             tkb.addEnv(true_env_id, env);
-            EpsilonManager.epsilon(true_env_id, envfactor);
+            EpsilonManager.epsilon(true_env_id, env.getKnowledge());
         } else {
             InteractionManager.interact();
         }
