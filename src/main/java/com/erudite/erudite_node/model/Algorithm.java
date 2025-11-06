@@ -34,12 +34,12 @@ public class Algorithm extends Knowledge {
         }
     }
 
-    private AlgoParameters processAct(Instance i, String act, AlgoParameters params){
+    private AlgoParameters processAct(OldInstance i, String act, AlgoParameters params){
         return ActionSpace.implement(act, new AlgoParameters(i.getValue(params.get(0).getStr())), new AlgoParameters(i.getValue(params.get(1).getStr())));
     }
 
-    public Instance executeAlgo(GenState s){
-        Instance o = new Instance(output);
+    public OldInstance executeAlgo(GenState s){
+        OldInstance o = new OldInstance(output);
         ArrayList<AlgoParameters> flatParams = new ArrayList<>();
         unpackAlgoParams(parameters, flatParams);
         for(int i = 0; i < outputs.size(); i++){
@@ -58,7 +58,7 @@ public class Algorithm extends Knowledge {
         // ONE: COLLECT ALL REWARDS
         ArrayList<Double> rewards = new ArrayList<>();
         for(GenState s : states){
-            Instance o = executeAlgo(s);
+            OldInstance o = executeAlgo(s);
             double r = rh.reward(s, new GenState("OUTPUT", o));
             rewards.add(r);
         }
