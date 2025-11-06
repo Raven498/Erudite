@@ -31,7 +31,7 @@ public class Director {
         return new ArrayList<>();
     }
 
-    public static InstanceTest getTrueInstance() throws IOException {
+    public static InstanceTest getTrueInstanceTest() throws IOException {
         OkHttpClient client = new OkHttpClient.Builder().writeTimeout(20, TimeUnit.SECONDS).build();
 
         Request request = new Request.Builder()
@@ -46,11 +46,32 @@ public class Director {
 
         ObjectMapper mapper = new ObjectMapper();
 
-        return mapper.readValue(responseJson, InstanceTest.class);
+        InstanceTest instanceTest = mapper.readValue(responseJson, InstanceTest.class);
+        return instanceTest;
     }
 
-    // This occurs per environment
-    public static void direct() {  // 0 usages
+    public static Instance getTrueInstance() throws IOException {
+        OkHttpClient client = new OkHttpClient.Builder().writeTimeout(20, TimeUnit.SECONDS).build();
+
+        Request request = new Request.Builder()
+                .url("http://localhost:8080/instance")
+                .addHeader("Content-Type", "application/json")
+                .get()
+                .build();
+
+        // Execute request and get response as JSON string
+        ResponseBody response = client.newCall(request).execute().body();
+        String responseJson = response.string();
+
+        ObjectMapper mapper = new ObjectMapper();
+
+        InstanceTest instanceTest = mapper.readValue(responseJson, InstanceTest.class);
+        Instance instance = new Instance();
+        instance.convertFromTest(instanceTest);
+        return instance;
+    }
+
+    public static void direct() {
         // Master epsilon
         double s = Math.random();
         if (s <= expansion_prob) {
@@ -147,7 +168,7 @@ Interactions MAY create new approximations - need to develop example cases where
         for(int i = 0; i < 20; i++){
             Random r = new Random();
             GenState g = new GenState( "ALGO-POWER",
-                    new Instance(k));
+                    new OldInstance(k));
             g.f.addValue("a", Integer.toString(r.nextInt(10)));
             g.f.addValue("x", "x");
             g.f.addValue("n", Integer.toString(r.nextInt(10)));

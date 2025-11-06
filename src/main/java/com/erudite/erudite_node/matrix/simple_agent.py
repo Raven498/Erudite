@@ -168,7 +168,6 @@ def get_corrs(outputs, inputs):
     plt.plot(np.array(inputs), np.array(rel_change))
     plt.show()
     return corrs
-
 gen(100)
 analyze()
 

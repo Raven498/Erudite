@@ -4,6 +4,7 @@ import com.erudite.erudite_node.dev_db.DevInterface;
 import com.erudite.erudite_node.dev_db.DevRepo;
 import com.erudite.erudite_node.dev_db.Pod;
 import com.erudite.erudite_node.management.Director;
+import com.erudite.erudite_node.model.Instance;
 import com.erudite.erudite_node.model.InstanceTest;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import okhttp3.*;
@@ -40,9 +41,17 @@ public class Controller {
         return new AlgoInfo("POWER RULE", "O.a = I.a * I.n, O.x = I.x, O.n = I.n - 1");
     }
 
+    @GetMapping("/instance")
+    public void instance() {
+        Instance instance = Director.getTrueInstance();
+        // Do something with the instance
+        System.out.println(instance);
+        System.out.println("IP FOR THIS MACHINE: " + InetAddress.getLocalHost().getHostAddress());
+    }
+
     @GetMapping("/instanceTest")
     public void instanceTest() throws IOException {
-        InstanceTest instance = Director.getTrueInstance();
+        InstanceTest instance = Director.getTrueInstanceTest();
         propagate(instance, true);
         System.out.println(instance);
         System.out.println("IP FOR THIS MACHINE: " + InetAddress.getLocalHost().getHostAddress());
@@ -85,6 +94,10 @@ public class Controller {
             }
             propCycle = 0;
         }
+
+        System.out.println("INSTANCE OUTPUT FOR THIS PROPAGATE: " + instance); // TODO: print the ip here somehow
+        System.out.println("IS APPROX NODE: " + isApproxNode);
+        System.out.println("PROP CYCLE: " + propCycle);
         return null;
     }
 
