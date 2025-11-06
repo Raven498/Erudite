@@ -26,8 +26,11 @@ public class Director {
         return new Environment();
     }
 
-    public static List<Knowledge> getTrueKnowledge() {  // 1 usage
-        // Hit endpoint, get true knowledge for the specific env topic
+    /*
+    TODO: Need to create new instance wrapper class of InstanceTest that extends Knowledge for testing Director and epsilon processes
+     */
+    public static List<Knowledge> getTrueKnowledge() throws IOException {
+        var instance = getTrueInstance();
         return new ArrayList<>();
     }
 

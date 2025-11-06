@@ -111,7 +111,11 @@ def analyze():
             #plt.plot(np.array(in_label_reg[j]), np.array(tru_label_reg[i]))
             #plt.show()
 
-    corrs = get_corrs(truth_a, input_a)
+    corr_reg = get_corrs(truth_a, input_a)
+    print("FINAL CORRS: ", corr_reg)
+    print(targets)
+    #exp(corr_reg[0], corr_reg[1], )
+
 
  
 def get_corrs(outputs, inputs):
@@ -167,9 +171,12 @@ def get_corrs(outputs, inputs):
     print(rel_change[8] == max(rel_change))
     plt.plot(np.array(inputs), np.array(rel_change))
     plt.show()
-    return corrs
+    corr_reg = [corrs, br]
+    return corr_reg
 gen(100)
 analyze()
+
+
 
 '''
 MOST MAJOR CONCERNS:
