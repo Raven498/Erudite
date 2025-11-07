@@ -43,7 +43,7 @@ public class Controller {
     }
 
     @GetMapping("/instance")
-    public void instance() throws UnknownHostException {
+    public void instance() throws UnknownHostException { // TODO: Catch UnknownHostException
         Instance instance = Director.getTrueInstance();
         // Do something with the instance
         System.out.println(instance);
@@ -51,7 +51,7 @@ public class Controller {
     }
 
     @GetMapping("/instanceTest")
-    public void instanceTest() throws IOException {
+    public void instanceTest() throws IOException { // TODO: Catch UnknownHostException
         InstanceTest instance = Director.getTrueInstanceTest();
         propagate(instance, true);
         System.out.println(instance);

@@ -105,6 +105,15 @@ public class Director {
 
             ObjectMapper mapper = new ObjectMapper();
 
+            /*
+            JsonNode responseNode = mapper.readTree(responseJson);
+            ObjectReader reader = mapper.readerFor(new TypeReference<List<String>>() {});
+            ArrayList<String> attrs = reader.readValue(responseNode.get("attrs")); // lookup correct JSON attr label
+            ArrayList<String> behaviors = reader.readValue(responseNode.get("behaviors")); // lookup correct JSON attr label
+            Concept concept = new Concept(responseNode.get("name"), "", Agent.KClasses.CONCEPT,  attrs, behaviors); // lookup correct JSON attr label
+            return concept;
+             */
+
             return mapper.readValue(responseJson, Concept.class);
         } catch(Exception e){
             e.printStackTrace();
