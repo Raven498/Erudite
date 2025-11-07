@@ -18,6 +18,6 @@ public class Concept extends Knowledge {
     }
 
     public String toString(){
-        return String.format("%s{%s}", name, attr_labels);
+        return String.format("%s{ATTRS: %s, BEHAVIORS: %s}", name, attr_labels, behaviors);
     }
 }

@@ -2,7 +2,8 @@ package com.erudite.erudite_node.management;
 
 import com.erudite.erudite_node.model.*;
 import com.erudite.erudite_node.service.Agent;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.*;
+import com.fasterxml.jackson.core.type.*;
 import okhttp3.*;
 
 import java.io.IOException;
@@ -102,19 +103,15 @@ public class Director {
         try{
             ResponseBody response = client.newCall(request).execute().body();
             String responseJson = response.string();
-
+            System.out.println("RESPONSE JSON: " + responseJson);
             ObjectMapper mapper = new ObjectMapper();
 
-            /*
             JsonNode responseNode = mapper.readTree(responseJson);
-            ObjectReader reader = mapper.readerFor(new TypeReference<List<String>>() {});
+            ObjectReader reader = mapper.readerFor(new TypeReference<ArrayList<String>>() {});
             ArrayList<String> attrs = reader.readValue(responseNode.get("attrs")); // lookup correct JSON attr label
             ArrayList<String> behaviors = reader.readValue(responseNode.get("behaviors")); // lookup correct JSON attr label
-            Concept concept = new Concept(responseNode.get("name"), "", Agent.KClasses.CONCEPT,  attrs, behaviors); // lookup correct JSON attr label
+            Concept concept = new Concept(responseNode.get("name").asText(), "", Agent.KClasses.CONCEPT,  attrs, behaviors); // lookup correct JSON attr label
             return concept;
-             */
-
-            return mapper.readValue(responseJson, Concept.class);
         } catch(Exception e){
             e.printStackTrace();
             return null;
@@ -178,9 +175,8 @@ Interactions MAY create new approximations - need to develop example cases where
         //TEST TKB ENV_SET
         ArrayList<Environment> test_env_set = new ArrayList<>();
         Environment env = new Environment();
-        Concept k = new Concept("MONOMIAL", "int a, int x, int n", Agent.KClasses.CONCEPT, new ArrayList<>(
-                Arrays.asList("a", "x", "n") //(NOTE: attr labels should be autopopulated by parsing content field)
-        ));
+        Concept k = new Concept("MONOMIAL", "int a, int x, int n", Agent.KClasses.CONCEPT,
+                new ArrayList<>(Arrays.asList("a", "x", "n")), new ArrayList<>()); //(NOTE: attr labels should be autopopulated by parsing content field)));
 
         ArrayList<String> out = new ArrayList<>(Arrays.asList(
                 "a",
