@@ -17,4 +17,8 @@ public class Environment {
     public void addKnowledge(List<Knowledge> k){
         knowledge.addAll(k);
     }
+
+    public String toString(){
+        return knowledge.toString();
+    }
 }

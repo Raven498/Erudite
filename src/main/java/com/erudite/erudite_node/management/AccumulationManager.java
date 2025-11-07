@@ -11,7 +11,7 @@ import java.util.UUID;
 
 public class AccumulationManager {
     public static KnowledgeBase akb = new KnowledgeBase();
-    public static Agent agent;
+    public static Agent agent = new Agent();
     public static final double[] K_TYPE_REL_DISTRIBUTION_REQ = new double[6];
 
     public static Environment initApproxEnv() {
@@ -21,10 +21,11 @@ public class AccumulationManager {
     public static void accumulate(UUID true_env_id, List<Knowledge> knowledge) {
         List<Knowledge> approxes = new ArrayList<>();
         for (Knowledge k : knowledge) {
-            //approxes.add(agent.approx(k));
+            approxes.add(agent.approx(k));
         }
         var approx_env = new Environment();
         approx_env.addKnowledge(approxes);
         akb.addEnv(true_env_id, approx_env);
+        System.out.println("AKB: " + akb);
     }
 }

@@ -22,4 +22,8 @@ public class Instance extends Knowledge {
     public Instance(){
         super("", "[ATTR-VALUES GO HERE]", Agent.KClasses.INSTANCE);
     }
+
+    public String toString(){
+        return String.format("%s of %s{%s, %s}", instanceName, conceptName, attrs.toString(), behaviorNames.toString());
+    }
 }

@@ -15,11 +15,11 @@ import java.util.concurrent.TimeUnit;
  * pacing and order of training & interaction, as well as throttling training and interaction commands through an algorithm
  * similar to the epsilon-greedy policy. It is also the only class that can send outgoing endpoint requests to external
  * entities such as the Interface and other nodes.
- * TODO: Revise this shitty explanation of what the Director does
+ * TODO: Revise explanation of what the Director does
  */
 public class Director {
     private static double expansion_prob = 1.0;
-    public static KnowledgeBase tkb;
+    public static KnowledgeBase tkb = new KnowledgeBase();
 
     public static Environment initEnv() {
         Environment env = new Environment();
@@ -29,6 +29,10 @@ public class Director {
 
     public static List<Knowledge> getTrueKnowledge() {
         ArrayList<Knowledge> trueKnowledge = new ArrayList<>();
+        Concept concept = getTrueConcept();
+        if (concept != null) {
+            trueKnowledge.add(concept);
+        }
         Instance instance = getTrueInstance();
         if(instance != null){
             trueKnowledge.add(instance);
@@ -36,22 +40,27 @@ public class Director {
         return trueKnowledge;
     }
 
-    public static InstanceTest getTrueInstanceTest() throws IOException {
+    public static InstanceTest getTrueInstanceTest() {
         OkHttpClient client = new OkHttpClient.Builder().writeTimeout(20, TimeUnit.SECONDS).build();
 
-        Request request = new Request.Builder()
-                .url("http://localhost:8080/instance")
-                .addHeader("Content-Type", "application/json")
-                .get()
-                .build();
+        try {
+            Request request = new Request.Builder()
+                    .url("http://localhost:8080/instance")
+                    .addHeader("Content-Type", "application/json")
+                    .get()
+                    .build();
 
-        // Execute request and get response as JSON string
-        ResponseBody response = client.newCall(request).execute().body();
-        String responseJson = response.string();
+            // Execute request and get response as JSON string
+            ResponseBody response = client.newCall(request).execute().body();
+            String responseJson = response.string();
 
-        ObjectMapper mapper = new ObjectMapper();
+            ObjectMapper mapper = new ObjectMapper();
 
-        return mapper.readValue(responseJson, InstanceTest.class);
+            return mapper.readValue(responseJson, InstanceTest.class);
+        } catch(Exception e){
+            e.printStackTrace();
+            return null;
+        }
     }
 
     public static Instance getTrueInstance()  {
@@ -74,6 +83,29 @@ public class Director {
             Instance instance = new Instance();
             instance.convertFromTest(instanceTest);
             return instance;
+        } catch(Exception e){
+            e.printStackTrace();
+            return null;
+        }
+    }
+
+    public static Concept getTrueConcept(){
+        OkHttpClient client = new OkHttpClient.Builder().writeTimeout(20, TimeUnit.SECONDS).build();
+
+        Request request = new Request.Builder()
+                .url("http://localhost:8080/concept")
+                .addHeader("Content-Type", "application/json")
+                .get()
+                .build();
+
+        // Execute request and get response as JSON string
+        try{
+            ResponseBody response = client.newCall(request).execute().body();
+            String responseJson = response.string();
+
+            ObjectMapper mapper = new ObjectMapper();
+
+            return mapper.readValue(responseJson, Concept.class);
         } catch(Exception e){
             e.printStackTrace();
             return null;
@@ -193,7 +225,7 @@ Interactions MAY create new approximations - need to develop example cases where
 
         //REAL TKB ENV_SET (EXTRACTION FROM SQLITE DB)
 
-        Agent agent = new Agent(tkb);
+        Agent agent = new Agent();
         agent.cycle();
     }
 

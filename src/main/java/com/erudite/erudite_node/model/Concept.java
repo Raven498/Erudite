@@ -14,4 +14,8 @@ public class Concept extends Knowledge {
         super(name, content, kclass);
         this.attr_labels = attr_labels;
     }
+
+    public String toString(){
+        return String.format("%s{%s}", name, attr_labels);
+    }
 }

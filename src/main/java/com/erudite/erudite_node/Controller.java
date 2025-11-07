@@ -22,6 +22,7 @@ import static org.springframework.web.bind.annotation.RequestBody.*;
 import java.io.IOException;
 import java.net.Inet4Address;
 import java.net.InetAddress;
+import java.net.UnknownHostException;
 import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.TimeUnit;
@@ -42,7 +43,7 @@ public class Controller {
     }
 
     @GetMapping("/instance")
-    public void instance() {
+    public void instance() throws UnknownHostException {
         Instance instance = Director.getTrueInstance();
         // Do something with the instance
         System.out.println(instance);

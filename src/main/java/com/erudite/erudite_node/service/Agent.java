@@ -20,12 +20,7 @@ public class Agent {
         INSTANCE,
         STATE
     }
-    KnowledgeBase trueKB;
     KnowledgeBase approxKB;
-
-    public Agent(KnowledgeBase trueKB){
-        this.trueKB = trueKB;
-    }
 
     /*
     TKB input content parsing algorithm
@@ -49,7 +44,7 @@ public class Agent {
 
     //Mainloop method
     public void cycle(){
-        accumulate();
+        //accumulateTest(trueKB);
         //(PRL SIM NEXT BEFORE INTERACTION)
         //prl_interact(states, new double[] {1.8, 0});
         //this.states = states;
@@ -57,7 +52,7 @@ public class Agent {
         //q_eval(1, 50);
     }
 
-    public void accumulate(){
+    public void accumulateTest(KnowledgeBase trueKB){
         KnowledgeBase akb = new KnowledgeBase();
         ArrayList<Environment> approx_env_set = new ArrayList<>();
         for(Environment env : trueKB.getEnvSet().values()){
@@ -90,9 +85,8 @@ public class Agent {
         return approx_env;
     }
 
-    // TODO: change return type to Knowledge
-    public void approx(Knowledge k){
-
+    public Knowledge approx(Knowledge k){
+        return k; // identity approximation
     }
 
     public double reward(State s){

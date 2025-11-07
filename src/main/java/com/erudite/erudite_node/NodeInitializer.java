@@ -23,9 +23,14 @@ public class NodeInitializer {
     public void registerNode(ApplicationReadyEvent event){
         // USE ONLY WITH K8S DEPLOYMENT
         //ip = System.getenv("POD_IP");
-        if(devInterface.getPodsByIp(ip).isEmpty()){
-            // Write to db
-            devInterface.addPod(ip);
+        try{
+            if(devInterface.getPodsByIp(ip).isEmpty()){
+                // Write to db
+                devInterface.addPod(ip);
+            }
+        } catch(Exception e){
+            System.out.println("Postgres DB connection error - moving on");
         }
+
     }
 }

@@ -2,13 +2,10 @@ package com.erudite.erudite_node.model;
 
 import com.erudite.erudite_node.model.Environment;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
 
 public class KnowledgeBase {
-    private Map<UUID, Environment> env_set;
+    private Map<UUID, Environment> env_set = new HashMap<>();
 
     public void addEnv(UUID uuid, Environment env) {
         env_set.putIfAbsent(uuid, env);
@@ -23,5 +20,9 @@ public class KnowledgeBase {
     }
     public void setEnvSet(List<Environment> env_set){
 
+    }
+
+    public String toString(){
+        return getEnvSet().toString();
     }
 }
