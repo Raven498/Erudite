@@ -12,7 +12,7 @@ import java.util.UUID;
 public class AccumulationManager {
     public static KnowledgeBase akb = new KnowledgeBase();
     public static Agent agent = new Agent();
-    public static final double[] K_TYPE_REL_DISTRIBUTION_REQ = new double[6];
+    public static final double[] K_TYPE_REL_DISTRIBUTION_REQ = new double[Agent.kTypes];
 
     public static Environment initApproxEnv() {
         return new Environment();
@@ -27,5 +27,24 @@ public class AccumulationManager {
         approx_env.addKnowledge(approxes);
         akb.addEnv(true_env_id, approx_env);
         System.out.println("AKB: " + akb);
+    }
+
+    /*
+    TODO: Document
+     */
+    public static ArrayList<Agent.KClasses> getRequiredKTypes(){
+        double[] currentDistribution = akb.getCurrentTypeDistribution();
+        ArrayList<Agent.KClasses> kTypes = new ArrayList<>();
+        for(int i = 0; i < currentDistribution.length; i++){
+            if(currentDistribution[i] < K_TYPE_REL_DISTRIBUTION_REQ[i]){
+                Agent.KClasses kType = Agent.KClasses.values()[i];
+                kTypes.add(kType);
+            }
+        }
+        return kTypes;
+    }
+
+    public static KnowledgeBase getAKB(){
+        return akb;
     }
 }

@@ -21,6 +21,7 @@ public class Agent {
         STATE
     }
     KnowledgeBase approxKB;
+    public static int kTypes = 6;
 
     /*
     TKB input content parsing algorithm

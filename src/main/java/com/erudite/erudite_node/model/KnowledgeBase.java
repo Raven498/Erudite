@@ -1,11 +1,13 @@
 package com.erudite.erudite_node.model;
 
 import com.erudite.erudite_node.model.Environment;
+import com.erudite.erudite_node.service.Agent;
 
 import java.util.*;
 
 public class KnowledgeBase {
     private Map<UUID, Environment> env_set = new HashMap<>();
+    private double[] currentTypeDistribution  = new double[Agent.kTypes];
 
     public void addEnv(UUID uuid, Environment env) {
         env_set.putIfAbsent(uuid, env);
@@ -24,5 +26,13 @@ public class KnowledgeBase {
 
     public String toString(){
         return getEnvSet().toString();
+    }
+
+    public double[] getCurrentTypeDistribution(){
+        return currentTypeDistribution;
+    }
+
+    public void setCurrentTypeDistribution(double[] currentTypeDistribution){
+        this.currentTypeDistribution = currentTypeDistribution;
     }
 }

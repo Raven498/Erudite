@@ -28,6 +28,17 @@ public class Director {
         return env;
     }
 
+    public static Knowledge request(Agent.KClasses kType){
+        switch(kType){
+            case Agent.KClasses.INSTANCE:
+                return getTrueInstance();
+            case Agent.KClasses.CONCEPT:
+                return getTrueConcept();
+            default:
+                return null;
+        }
+    }
+
     public static List<Knowledge> getTrueKnowledge() {
         ArrayList<Knowledge> trueKnowledge = new ArrayList<>();
         Concept concept = getTrueConcept();
@@ -121,14 +132,14 @@ public class Director {
     public static void direct() {
         // Master epsilon
         double s = Math.random();
-        if (s <= expansion_prob) {
+        if (s <= expansion_prob) { // Expansion
             // Init true env, add to TKB
             var env = initEnv();
             UUID true_env_id = UUID.randomUUID();
             tkb.addEnv(true_env_id, env);
-            EpsilonManager.epsilon(true_env_id, env.getKnowledge());
-        } else {
-            InteractionManager.interact();
+            EpsilonManager.epsilon(true_env_id);
+        } else { // Focus
+
         }
     }
 
