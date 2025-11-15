@@ -14,7 +14,9 @@ public class EpsilonManager {
     public static void epsilon(UUID true_env_id) {
         double s = Math.random();
         if (s <= training_prob) { // Train
-            AccumulationManager.accumulate(true_env_id, getRequiredKnowledge(AccumulationManager.getRequiredKTypes()));
+            if(AccumulationManager.verify()){
+                AccumulationManager.accumulate(true_env_id, getRequiredKnowledge(AccumulationManager.getRequiredKTypes()));
+            }
         } else { // Interact
             InteractionManager.interact();
         }

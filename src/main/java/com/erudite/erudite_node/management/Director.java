@@ -39,6 +39,10 @@ public class Director {
         }
     }
 
+    public static Environment initEnvSim(){
+        // InterfaceSimulator.getEnv();
+    }
+
     public static List<Knowledge> getTrueKnowledge() {
         ArrayList<Knowledge> trueKnowledge = new ArrayList<>();
         Concept concept = getTrueConcept();
@@ -134,7 +138,7 @@ public class Director {
         double s = Math.random();
         if (s <= expansion_prob) { // Expansion
             // Init true env, add to TKB
-            var env = initEnv();
+            var env = initEnvSim();
             UUID true_env_id = UUID.randomUUID();
             tkb.addEnv(true_env_id, env);
             EpsilonManager.epsilon(true_env_id);

@@ -44,6 +44,17 @@ public class AccumulationManager {
         return kTypes;
     }
 
+    public static boolean verify(){
+        ArrayList<Agent.KClasses> kTypes = getRequiredKTypes();
+        if(kTypes.isEmpty()){
+            EpsilonManager.releaseAccumulationSpace(0.05);
+            return false;
+        } else{
+            EpsilonManager.addAccumulationSpace(0.05);
+            return true;
+        }
+    }
+
     public static KnowledgeBase getAKB(){
         return akb;
     }
