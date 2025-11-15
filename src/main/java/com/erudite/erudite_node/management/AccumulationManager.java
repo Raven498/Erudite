@@ -58,4 +58,16 @@ public class AccumulationManager {
     public static KnowledgeBase getAKB(){
         return akb;
     }
+
+    public static int getKTypeSize(Agent.KClasses kType){
+        int kTypeSize = 0;
+        for(Environment env : akb.getEnvSet().values()){
+            for(Knowledge k : env.getKnowledge()){
+                if(k.getKClass() == kType){
+                    kTypeSize += 1;
+                }
+            }
+        }
+        return kTypeSize;
+    }
 }
