@@ -32,6 +32,8 @@ public class KnowledgeBase {
         return currentTypeDistribution;
     }
 
+    public void setCurrentTypeDistribution(){this.currentTypeDistribution = currentTypeDistribution;}
+
     public void setCurrentTypeDistribution(double[] currentTypeDistribution){
         this.currentTypeDistribution = currentTypeDistribution;
     }

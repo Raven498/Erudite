@@ -5,6 +5,7 @@ import com.erudite.erudite_node.service.Agent;
 import com.fasterxml.jackson.databind.*;
 import com.fasterxml.jackson.core.type.*;
 import okhttp3.*;
+import org.springframework.http.HttpStatus;
 
 import java.io.IOException;
 import java.util.*;
@@ -37,10 +38,6 @@ public class Director {
             default:
                 return null;
         }
-    }
-
-    public static Environment initEnvSim(){
-        // InterfaceSimulator.getEnv();
     }
 
     public static List<Knowledge> getTrueKnowledge() {
@@ -122,6 +119,14 @@ public class Director {
             ObjectMapper mapper = new ObjectMapper();
 
             JsonNode responseNode = mapper.readTree(responseJson);
+
+            // Handling Gemini RPM/TPM rate limits
+            if(responseNode.get("status") != null && Objects.equals(responseNode.get("status").asText(), "429")){
+                // Indicate to mainloop (from EruditeApplication) that it should wait one minute from current time
+            }
+
+            // TODO: Handle Gemini RPD rate limits
+
             ObjectReader reader = mapper.readerFor(new TypeReference<ArrayList<String>>() {});
             ArrayList<String> attrs = reader.readValue(responseNode.get("attrs")); // lookup correct JSON attr label
             ArrayList<String> behaviors = reader.readValue(responseNode.get("behaviors")); // lookup correct JSON attr label
@@ -138,7 +143,7 @@ public class Director {
         double s = Math.random();
         if (s <= expansion_prob) { // Expansion
             // Init true env, add to TKB
-            var env = initEnvSim();
+            var env = new Environment(getTrueKnowledge());
             UUID true_env_id = UUID.randomUUID();
             tkb.addEnv(true_env_id, env);
             EpsilonManager.epsilon(true_env_id);

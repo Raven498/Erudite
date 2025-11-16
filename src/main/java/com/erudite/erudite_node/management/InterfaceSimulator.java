@@ -6,10 +6,10 @@ import com.erudite.erudite_node.model.Instance;
 import com.erudite.erudite_node.model.Knowledge;
 import com.erudite.erudite_node.service.Agent;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
-import static com.erudite.erudite_node.management.Director.getTrueConcept;
 
 /*
 Contains custom unit tests to verify all management functionality
@@ -23,46 +23,46 @@ public class InterfaceSimulator {
     public static double[] k_type_req_distrib_2 = new double[] {};
     public static double[] k_type_req_distrib_3 = new double[] {};
     public static double[] current_req_distrib = k_type_req_distrib_1;
-    public static double[] current_distrib;
+    public static double[] current_distrib = new double[] {0.0, 0.0, 0.0, 0.0, 0.0, 0.0};
 
     public static Knowledge generateKnowledge(Agent.KClasses kType){
         switch(kType){
             case Agent.KClasses.INSTANCE:
                 return new Instance();
             case Agent.KClasses.CONCEPT:
-                return new Concept();
+                return new Concept("", "", Agent.KClasses.CONCEPT, new ArrayList<>(), new ArrayList<>());
             default:
                 return null;
         }
     }
 
     // Test for expansion - construct new true env, pass to Director, verify distribution levels
-    public static Environment getEnv(int akbSize){
+    public static Environment getEnv(){
         Environment environment = new Environment();
-        if(akbSize != 0){
-            Random random = new Random();
-            // For each k type, generate random number of knowledge (below 10)
-            for(Agent.KClasses k : Agent.KClasses.values()){
-                for(int i = 0; i < random.nextInt(); i++){
-                    environment.addKnowledge(generateKnowledge(k));
-                }
+        Random random = new Random();
+        // For each k type, generate random number of knowledge (below 10)
+        for(Agent.KClasses k : Agent.KClasses.values()){
+            for(int i = 0; i < random.nextInt(11); i++){
+                environment.addKnowledge(generateKnowledge(k));
             }
-        } else{
-            updateDistrib(0.0);
         }
+        return environment;
     }
 
-    public static void updateDistrib(double value){
+
+
+    private static void updateDistrib(double value){
         for(int i = 0; i < current_distrib.length; i++){
             current_distrib[i] = value;
         }
     }
 
-
+/*
     // Focus --> explore
     public static List<Knowledge> getDelta(){
-        System.out.println("Invalid Expansion"); // TODO: Replace with custom exception
+
     }
+ */
 /*
     // Focus --> interact
     public static List<Knowledge> getDelta(){

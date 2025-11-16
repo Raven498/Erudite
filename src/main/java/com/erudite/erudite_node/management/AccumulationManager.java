@@ -14,10 +14,6 @@ public class AccumulationManager {
     public static Agent agent = new Agent();
     public static final double[] K_TYPE_REL_DISTRIBUTION_REQ = new double[Agent.kTypes];
 
-    public static Environment initApproxEnv() {
-        return new Environment();
-    }
-
     public static void accumulate(UUID true_env_id, List<Knowledge> knowledge) {
         List<Knowledge> approxes = new ArrayList<>();
         for (Knowledge k : knowledge) {
@@ -26,6 +22,7 @@ public class AccumulationManager {
         var approx_env = new Environment();
         approx_env.addKnowledge(approxes);
         akb.addEnv(true_env_id, approx_env);
+        updateDistrib();
         System.out.println("AKB: " + akb);
     }
 
@@ -59,6 +56,14 @@ public class AccumulationManager {
         return akb;
     }
 
+    private static void updateDistrib(){
+        double[] current = akb.getCurrentTypeDistribution();
+        for(int i = 0; i < current.length; i++){
+            current[i] = (double) getKTypeSize(Agent.KClasses.values()[i]) / getAKBSize();
+        }
+        akb.setCurrentTypeDistribution(current);
+    }
+
     public static int getKTypeSize(Agent.KClasses kType){
         int kTypeSize = 0;
         for(Environment env : akb.getEnvSet().values()){
@@ -69,5 +74,15 @@ public class AccumulationManager {
             }
         }
         return kTypeSize;
+    }
+
+    public static int getAKBSize(){
+        int akbSize = 0;
+        for(Environment env : akb.getEnvSet().values()){
+            for(Knowledge k : env.getKnowledge()){
+                akbSize += 1;
+            }
+        }
+        return akbSize;
     }
 }

@@ -4,9 +4,17 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class Environment {
-    private ArrayList<Knowledge> knowledge = new ArrayList<>();
+    private List<Knowledge> knowledge = new ArrayList<>();
 
-    public ArrayList<Knowledge> getKnowledge(){
+    public Environment() {
+
+    }
+
+    public Environment(List<Knowledge> knowledge){
+        this.knowledge = knowledge;
+    }
+
+    public List<Knowledge> getKnowledge(){
         return knowledge;
     }
 
