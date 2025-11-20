@@ -1,5 +1,6 @@
 package com.erudite.erudite_node.management;
 
+import com.erudite.erudite_node.EruditeApplication;
 import com.erudite.erudite_node.model.*;
 import com.erudite.erudite_node.service.Agent;
 import com.fasterxml.jackson.databind.*;
@@ -91,8 +92,19 @@ public class Director {
             String responseJson = response.string();
 
             ObjectMapper mapper = new ObjectMapper();
+            JsonNode responseNode = mapper.readTree(responseJson);
+
+            if(responseNode.get("status") != null && Objects.equals(responseNode.get("status").asText(), "418")){
+                // Indicate to mainloop (from EruditeApplication) that it should wait one minute from current time
+                EruditeApplication.delay = true;
+                return null;
+            } else{
+                EruditeApplication.delay = false;
+            }
 
             InstanceTest instanceTest = mapper.readValue(responseJson, InstanceTest.class);
+
+
             Instance instance = new Instance();
             instance.convertFromTest(instanceTest);
             return instance;
@@ -121,8 +133,12 @@ public class Director {
             JsonNode responseNode = mapper.readTree(responseJson);
 
             // Handling Gemini RPM/TPM rate limits
-            if(responseNode.get("status") != null && Objects.equals(responseNode.get("status").asText(), "429")){
+            if(responseNode.get("status") != null && Objects.equals(responseNode.get("status").asText(), "418")){
                 // Indicate to mainloop (from EruditeApplication) that it should wait one minute from current time
+                EruditeApplication.delay = true;
+                return null;
+            } else{
+                EruditeApplication.delay = false;
             }
 
             // TODO: Handle Gemini RPD rate limits
