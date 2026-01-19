@@ -55,7 +55,7 @@ public class Director {
     }
 
     public static InstanceTest getTrueInstanceTest() {
-        OkHttpClient client = new OkHttpClient.Builder().writeTimeout(20, TimeUnit.SECONDS).build();
+        OkHttpClient client = new OkHttpClient.Builder().readTimeout(0, TimeUnit.SECONDS).build();
 
         try {
             Request request = new Request.Builder()
@@ -78,7 +78,7 @@ public class Director {
     }
 
     public static Instance getTrueInstance()  {
-        OkHttpClient client = new OkHttpClient.Builder().writeTimeout(20, TimeUnit.SECONDS).build();
+        OkHttpClient client = new OkHttpClient.Builder().readTimeout(0, TimeUnit.SECONDS).build();
 
         Request request = new Request.Builder()
                 .url("http://localhost:8080/instance")
@@ -90,6 +90,7 @@ public class Director {
         try{
             ResponseBody response = client.newCall(request).execute().body();
             String responseJson = response.string();
+            System.out.println("RESPONSE JSON (INSTANCE): " + responseJson);
 
             ObjectMapper mapper = new ObjectMapper();
             JsonNode responseNode = mapper.readTree(responseJson);
@@ -115,7 +116,7 @@ public class Director {
     }
 
     public static Concept getTrueConcept(){
-        OkHttpClient client = new OkHttpClient.Builder().writeTimeout(20, TimeUnit.SECONDS).build();
+        OkHttpClient client = new OkHttpClient.Builder().readTimeout(0, TimeUnit.SECONDS).build();
 
         Request request = new Request.Builder()
                 .url("http://localhost:8080/concept")
@@ -127,7 +128,7 @@ public class Director {
         try{
             ResponseBody response = client.newCall(request).execute().body();
             String responseJson = response.string();
-            System.out.println("RESPONSE JSON: " + responseJson);
+            System.out.println("RESPONSE JSON (CONCEPT): " + responseJson);
             ObjectMapper mapper = new ObjectMapper();
 
             JsonNode responseNode = mapper.readTree(responseJson);
