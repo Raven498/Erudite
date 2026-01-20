@@ -1,0 +1,36 @@
+UPCOMING PATHS:
+1. Model Experimentation: Discovering new models from LM Studio, pulling from Ollama and using local API to access and test
+	- New models under consideration: Phi-4 14b (Microsoft)
+	- Quality-time tradeoff: Find a model that balances true knowledge quality with inference time
+	- Data collection & metrics: Need to collect hard data on the time of each individual usage of models and develop overall metrics for analysis & comparison among models
+		- Time-keeping occurs at node level to take into account connection overhead (which is negligible due to localhost connection, so essentially the same as the interface level)
+		- Metrics to consider: average prompt time for instances, avg prompt time for concepts, total prompt time for instances, total prompt time for concepts
+		- Data quality metric: Need a rating system for outputs of the models (similar to a potential output quality model for prompt engineering)
+			- Needs to model the quality (or usefulness) of model outputs relative to other models' outputs (we assume quality of outputs from the same model are consistent)
+			- In the true knowledge case: Need to model the generality and specificity of true knowledge (instances, concepts) outputted by models relative to other models' true knowledge
+				- Requires a mathematical model for analysis compared to respective time data from each model
+		- Graph data quality, time metrics across models potentially in a line graph (two lines for data quality and time, composed of discrete points from each model)
+2. Environmentally based prompts: Testing new environmental prompts that query for true knowledge against overall environmental topic
+	- Hypothesized to provide higher quality individual true knowledge than older single prompts --> need to verify using data collection methods discussed above
+	- Use same data collection/model experimentation techniques discussed above to analyze overall efficiency, quality of these prompts
+3. Long-haul true knowledge collection from better models (e.g. GPT-OSS 20b): Extend time cap to continually "scrape" higher quality true knowledge from these models, store offsite
+	- These models are hypothesized (based off preliminary tests) to take longer to provide higher-quality knowledge than lower models (e.g. Gemma 4b)
+		- Will require longer periods of running time to scrape collections of true knowledge
+		- Goal: Over the long term, use this method to create (fairly) large dataset of high-quality true knowledge, from which lower-level models can sample to craft TKBs (for example, using environmentally based prompts)
+			- Can also inject them directly into nodes' TKBs --> requires a knowledge injection mechanism at node or interface level
+				- Useful for smaller, manual tests of Erudite learning algorithms
+4. Erudite learning algorithm development: Building novel algorithms and/or combining pre-existing learning algorithms to construct AKBs
+	- Can start with pre-existing algorithms, with a focus on combining their abilities to create approximations
+	- May need novel algorithms (or updates to pre-existing algorithms) to conduct symbolic (logical) reasoning, creating approximations involving "objects" and their hierarchies, etc.
+	- Continue developing the learning simulation described in green notebook for ideas on novel algorithms
+5. Management: Verifying the accuracy of management algorithms according to specifications, implementing any necessary improvements
+	- Develop robust logging system that outputs detailed descriptions of every action taken by managers (Director, Epsilon/Accum Managers, etc.) + management flow
+		- Algorithms to visualize this graphically???
+	- Store logs over time, use for analysis of management cycles & for diagnosing issues
+	- Hypothesis: The randomness of Epsilon cycles is working, but may not be random enough
+		- First aspect to verify via logging
+6. Overall Planning & Miscellaneous: Need to clean up + re-establish timelines, sprint cycles, all stories & epics via Jira
+	- GitHub management: Make sure branches are being used for intended purposes, merge necessary components/branches
+	- Secrets management: Need to design, develop the Whisper system for hiding secrets:
+		- Preliminary design: Use local files to store secrets, encrypt/password lock them somehow, and have nodes/interfaces read them
+			- Note: No more API keys b/c of Ollama --> still need secrets for Postgres passwords, application.properties
