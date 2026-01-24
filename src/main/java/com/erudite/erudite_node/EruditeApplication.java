@@ -10,7 +10,7 @@ import java.time.LocalTime;
 @SpringBootApplication(scanBasePackages = "com.erudite.erudite_node")
 public class EruditeApplication {
 	public static boolean delay = false;
-	private static final int TOTAL_TIME_CAP = 1;
+	private static final int TOTAL_TIME_CAP = 2;
 	private static final int DELAY_TIME = 1;
 
 	public static void main(String[] args) {
@@ -18,7 +18,9 @@ public class EruditeApplication {
 		int startTime = getCurrentTime();
 		int rounds = 1;
 		while(getCurrentTime() - startTime < TOTAL_TIME_CAP){ // Director Mainloop
-			Logger.logIterationStart(rounds, getCurrentTime(), getCurrentTime() - startTime, delay);
+            if(rounds % 10 == 0){
+                Logger.logIterationStart(rounds, getCurrentTime(), getCurrentTime() - startTime, delay);
+            }
 			if(delay){
 				delay();
 			}
@@ -26,6 +28,7 @@ public class EruditeApplication {
 			rounds += 1;
 		}
 		Logger.saveLogs();
+        System.out.println("OVER");
 	}
 
 	public static int getCurrentTime(){

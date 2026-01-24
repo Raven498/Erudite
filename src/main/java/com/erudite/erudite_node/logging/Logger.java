@@ -55,11 +55,11 @@ public class Logger {
     // Write to a file
     public static void saveLogs(){
         System.out.println(new File(".").getAbsolutePath());
-        try(ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream(String.format(LOG_FILE_NAME_STEM, logFileNumber)))){ // TODO: need to parse timestamp to remove prohibited characters (ex. colons)
+        try(PrintWriter pw = new PrintWriter(new FileOutputStream(String.format(LOG_FILE_NAME_STEM, logFileNumber)))){ // TODO: need to parse timestamp to remove prohibited characters (ex. colons)
             for(String log : logs){
-                oos.writeObject(log);
+                pw.write(log);
             }
-            oos.flush();
+            pw.flush();
             logFileNumber += 1;
         } catch(Exception e){
             e.printStackTrace();
