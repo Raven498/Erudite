@@ -18,7 +18,8 @@ public class Agent {
         ALGORITHM,
         CONCEPT,
         INSTANCE,
-        STATE
+        STATE,
+        GOAL
     }
     KnowledgeBase trueKB;
     KnowledgeBase approxKB;
