@@ -43,7 +43,15 @@ public class Demo {
     }
 
     public static void blue_transition(){
-
+        InstanceKnowledge pot = (InstanceKnowledge) (i6.getValue("C1 pot"));
+        pot.addValue("C2 color", i1);
+        if (i6.getValue("C1 pot") == i3) {
+            i6.addValue("C1 pot", i3);
+        } else if (i6.getValue("C1 pot") == i4) {
+            i6.addValue("C1 pot", i3);
+        } else if (i6.getValue("C1 pot") == i5) {
+            i6.addValue("C1 pot", i4);
+        }
     }
 
     public static void main(String[] args){
