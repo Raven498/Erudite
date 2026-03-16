@@ -14,6 +14,10 @@ public class Knowledge implements Approximation {
         this.kclass = kclass;
     }
 
+    public Agent.KClasses getKClass(){
+        return kclass;
+    }
+
     @Override
     public Knowledge approx(){
         return null;

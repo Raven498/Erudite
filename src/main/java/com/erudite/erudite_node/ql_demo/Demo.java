@@ -5,6 +5,7 @@ import com.erudite.erudite_node.service.Agent;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 
 public class Demo {
     static Concept c1 = new Concept("Pot", "C1", Agent.KClasses.CONCEPT,
@@ -29,7 +30,8 @@ public class Demo {
     static InstanceKnowledge i6 = new InstanceKnowledge("CP1", "I6", Agent.KClasses.INSTANCE, c3);
     static Knowledge k9 = i6;
     static DemoGoal goal = new DemoGoal("Goal", "G1", Agent.KClasses.GOAL);
-
+    static Knowledge k12 = goal;
+    static Environment e = new Environment();
     public static void red_transition(){
         InstanceKnowledge pot = (InstanceKnowledge) (i6.getValue("C1 pot"));
         pot.addValue("C2 color", i2);
@@ -54,6 +56,42 @@ public class Demo {
         }
     }
 
+    public static boolean goalSatisfied(){
+        int matches = 0;
+        for (Knowledge k : e.getKnowledge()){
+            if (k.getKClass() == Agent.KClasses.INSTANCE){
+                InstanceKnowledge i = (InstanceKnowledge) k;
+                if (goal.instances.contains(i.content)){
+                    int index = goal.instances.indexOf(i.content);
+                    if (i.getValue(goal.attr_labels.get(index)).equals(goal.values.get(index))){
+                        matches += 1;
+                    }
+                }
+            }
+        }
+
+        return (matches == goal.values.size());
+    }
+
+    public static Environment snapshotEnv(){
+        Environment copy = new Environment();
+        for (Knowledge k : e.getKnowledge()){
+            Knowledge k_copy = null;
+            if (k.getKClass() == Agent.KClasses.INSTANCE) {
+                InstanceKnowledge i = (InstanceKnowledge) k;
+                k_copy = new InstanceKnowledge(k.name, k.content, k.getKClass(), i.c);
+                var i_copy = (InstanceKnowledge) k_copy;
+                for (int j = 0; j < i.values.length; j++) {
+                    i_copy.addValue(i.c.attr_labels.get(j), i.values[j]);
+                }
+            } else {
+                k_copy = k;
+            }
+            copy.getKnowledge().add(k_copy);
+        }
+        return copy;
+    }
+
     public static void main(String[] args){
         i3.addValue("C2 color", i1);
 
@@ -63,9 +101,66 @@ public class Demo {
 
         i6.addValue("C1 pot", i3);
 
-        goal.attrs.put("CP1.pot", "P3.color");
+        goal.instances.add("CP1");
+        goal.instances.add("P3");
+        goal.attr_labels.add("C1.pot");
+        goal.attr_labels.add("C2 color");
         goal.values.add(i5);
         goal.values.add(i1);
+
+        List<Knowledge> tkb = new ArrayList<> (Arrays.asList(k1, k2, k3, k4, k5, k6, k7, k8, k12));
+        e.addKnowledge(tkb);
+        int n = 100;
+        Environment e_init = snapshotEnv();
+        Environment e_delta = new Environment();
+        ArrayList<String> attrs = new ArrayList<>();
+        ArrayList<ArrayList<Object>> value_space = new ArrayList<>();
+        for(int i = 0; i < n; i++) {
+            while (!goalSatisfied()) {
+                for (int j = 0; j < 2; j++){
+                    if (j == 0) {
+                        blue_transition();
+                    } else {
+                        red_transition();
+                    }
+
+                    for(Knowledge k : e.getKnowledge()) {
+                        if (k.getKClass() == Agent.KClasses.INSTANCE) {
+                            InstanceKnowledge instance = (InstanceKnowledge) k;
+                            InstanceKnowledge i_o = null;
+                            for (Knowledge k_o : e_init.getKnowledge()) {
+                                if (k_o.content.equals(k.content)) {
+                                    i_o = (InstanceKnowledge) k_o;
+                                }
+                            }
+
+                            if (i_o == null) {
+                                break;
+                            }
+
+                            for (String attr : instance.c.attr_labels) {
+                                if (!instance.getValue(attr).equals(i_o.getValue(attr)) && !e_delta.getKnowledge().contains(k)) {
+                                    e_delta.addKnowledge(k);
+                                    attrs.add(attr);
+                                    value_space.add(new ArrayList<>(Arrays.asList(instance.getValue(attr))));
+                                } else if (e_delta.getKnowledge().contains(k)) {
+                                    boolean inValueSpace = false;
+                                    for (Object v : value_space.get(e_delta.getKnowledge().indexOf(k))) {
+                                        if (v.equals(instance.getValue(attr))) {
+                                            inValueSpace = true;
+                                        }
+                                    }
+
+                                    if (!inValueSpace) {
+                                        value_space.get(e_delta.getKnowledge().indexOf(k)).add(instance.getValue(attr));
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
     }
 
 }

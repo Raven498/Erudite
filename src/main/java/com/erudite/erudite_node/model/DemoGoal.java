@@ -7,7 +7,8 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class DemoGoal extends Knowledge {
-    public Map<String, String> attrs = new HashMap<>();
+    public ArrayList<String> instances = new ArrayList<>();
+    public ArrayList<String> attr_labels = new ArrayList<>();
     public ArrayList<Object> values = new ArrayList<>();
     public DemoGoal(String name, String content, Agent.KClasses kclass) {
         super(name, content, kclass);
