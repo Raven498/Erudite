@@ -10,7 +10,7 @@ public class InstanceKnowledge extends Knowledge{
     public InstanceKnowledge(String name, String content, Agent.KClasses kclass, Concept c){
         super(name, content, kclass);
         this.c = c;
-        this.values = new String[c.attr_labels.size()];
+        this.values = new Object[c.attr_labels.size()];
     }
 
     public void addValue(String attr, Object v){

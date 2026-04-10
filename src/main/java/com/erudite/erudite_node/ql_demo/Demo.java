@@ -3,9 +3,11 @@ package com.erudite.erudite_node.ql_demo;
 import com.erudite.erudite_node.model.*;
 import com.erudite.erudite_node.service.Agent;
 
+import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
 
 public class Demo {
     static Concept c1 = new Concept("Pot", "C1", Agent.KClasses.CONCEPT,
@@ -20,9 +22,9 @@ public class Demo {
     static Knowledge k4 = i2;
     static InstanceKnowledge i3 = new InstanceKnowledge("P1", "I3", Agent.KClasses.INSTANCE, c1);
     static Knowledge k5 = i3;
-    static InstanceKnowledge i4 = new InstanceKnowledge("P2", "I4", Agent.KClasses.INSTANCE, c2);
+    static InstanceKnowledge i4 = new InstanceKnowledge("P2", "I4", Agent.KClasses.INSTANCE, c1);
     static Knowledge k6 = i4;
-    static InstanceKnowledge i5 = new InstanceKnowledge("P3", "I5", Agent.KClasses.INSTANCE, c2);
+    static InstanceKnowledge i5 = new InstanceKnowledge("P3", "I5", Agent.KClasses.INSTANCE, c1);
     static Knowledge k7 = i5;
     static Concept c3 = new Concept("Current Pot", "C3", Agent.KClasses.CONCEPT,
             new ArrayList<>(Arrays.asList("C1 pot")));
@@ -103,7 +105,7 @@ public class Demo {
 
         goal.instances.add("CP1");
         goal.instances.add("P3");
-        goal.attr_labels.add("C1.pot");
+        goal.attr_labels.add("C1 pot");
         goal.attr_labels.add("C2 color");
         goal.values.add(i5);
         goal.values.add(i1);
@@ -111,10 +113,11 @@ public class Demo {
         List<Knowledge> tkb = new ArrayList<> (Arrays.asList(k1, k2, k3, k4, k5, k6, k7, k8, k12));
         e.addKnowledge(tkb);
         int n = 100;
-        Environment e_init = snapshotEnv();
+        Environment e_master = snapshotEnv();
+        Environment e_init = e_master;
         Environment e_delta = new Environment();
-        ArrayList<String> attrs = new ArrayList<>();
-        ArrayList<ArrayList<Object>> value_space = new ArrayList<>();
+        ArrayList<ArrayList<String>> attr_space = new ArrayList<>();
+        ArrayList<ArrayList<ArrayList<Object>>> value_space = new ArrayList<>();
         for(int i = 0; i < n; i++) {
             while (!goalSatisfied()) {
                 for (int j = 0; j < 2; j++){
@@ -139,11 +142,30 @@ public class Demo {
                             }
 
                             for (String attr : instance.c.attr_labels) {
-                                if (!instance.getValue(attr).equals(i_o.getValue(attr)) && !e_delta.getKnowledge().contains(k)) {
-                                    e_delta.addKnowledge(k);
-                                    attrs.add(attr);
-                                    value_space.add(new ArrayList<>(Arrays.asList(instance.getValue(attr))));
-                                } else if (e_delta.getKnowledge().contains(k)) {
+                                /*
+                                Instance's attribute value has changed from last iteration
+                                 */
+                                System.out.println(instance.content);
+                                System.out.println(attr);
+
+                                if (!Objects.equals(instance.getValue(attr), i_o.getValue(attr))) {
+                                    int k_index = e_delta.getKnowledge().indexOf(k);
+                                    int a_index = attr_space.get(k_index).indexOf(attr);
+                                    if (!e_delta.getKnowledge().contains(k)) {
+                                        e_delta.addKnowledge(k);
+                                        attr_space.add(new ArrayList<>(Arrays.asList(attr)));
+                                    } else {
+                                        if (!attr_space.get(k_index).contains(attr)) {
+                                            attr_space.get(k_index).add(attr);
+                                            value_space.add(new ArrayList<>(Arrays.asList(new ArrayList<>(Arrays.asList(instance.getValue(attr))))));
+                                        } else {
+                                            if (!value_space.get(k_index).get(a_index).contains(instance.getValue(attr))) {
+                                                value_space.get(k_index).get(a_index).add(instance.getValue(attr));
+                                            }
+                                        }
+                                    }
+
+                                } /*else if (e_delta.getKnowledge().contains(k)) {
                                     boolean inValueSpace = false;
                                     for (Object v : value_space.get(e_delta.getKnowledge().indexOf(k))) {
                                         if (v.equals(instance.getValue(attr))) {
@@ -154,9 +176,24 @@ public class Demo {
                                     if (!inValueSpace) {
                                         value_space.get(e_delta.getKnowledge().indexOf(k)).add(instance.getValue(attr));
                                     }
-                                }
+                                }*/
                             }
                         }
+                    }
+                    e_init = snapshotEnv();
+                }
+            }
+            e_init = e_master;
+        }
+
+        System.out.println("-------------------- ENVIRONMENT DELTAS -----------------------");
+        for (int i = 0; i < e_delta.getKnowledge().size(); i++) {
+            for (int j = 0; j < attr_space.get(i).size(); j++) {
+                for (Object v : value_space.get(i).get(j)) {
+                    if (v instanceof InstanceKnowledge) {
+                        System.out.println(e_delta.getKnowledge().get(i).content + ": " + attr_space.get(i).get(j) + ": " + ((InstanceKnowledge) v).content);
+                    } else {
+                        System.out.println(e_delta.getKnowledge().get(i).content + ": " + attr_space.get(i).get(j) + ": " + v);
                     }
                 }
             }
