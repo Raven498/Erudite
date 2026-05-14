@@ -71,7 +71,7 @@ public class Demo {
                 }
             }
         }
-
+        System.out.println(matches);
         return (matches == goal.values.size());
     }
 
@@ -119,6 +119,7 @@ public class Demo {
         ArrayList<ArrayList<String>> attr_space = new ArrayList<>();
         ArrayList<ArrayList<ArrayList<Object>>> value_space = new ArrayList<>();
         for(int i = 0; i < n; i++) {
+            System.out.println("AT EPISODE: " + i);
             while (!goalSatisfied()) {
                 for (int j = 0; j < 2; j++){
                     if (j == 0) {
@@ -145,16 +146,14 @@ public class Demo {
                                 /*
                                 Instance's attribute value has changed from last iteration
                                  */
-                                System.out.println(instance.content);
-                                System.out.println(attr);
 
                                 if (!Objects.equals(instance.getValue(attr), i_o.getValue(attr))) {
                                     int k_index = e_delta.getKnowledge().indexOf(k);
-                                    int a_index = attr_space.get(k_index).indexOf(attr);
                                     if (!e_delta.getKnowledge().contains(k)) {
                                         e_delta.addKnowledge(k);
                                         attr_space.add(new ArrayList<>(Arrays.asList(attr)));
                                     } else {
+                                        int a_index = attr_space.get(k_index).indexOf(attr);
                                         if (!attr_space.get(k_index).contains(attr)) {
                                             attr_space.get(k_index).add(attr);
                                             value_space.add(new ArrayList<>(Arrays.asList(new ArrayList<>(Arrays.asList(instance.getValue(attr))))));
