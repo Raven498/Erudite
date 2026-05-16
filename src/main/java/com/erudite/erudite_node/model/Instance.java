@@ -2,28 +2,21 @@ package com.erudite.erudite_node.model;
 
 import com.erudite.erudite_node.service.Agent;
 
-import java.util.ArrayList;
-import java.util.Map;
+//Turn into Generic to support more datatypes
+public class Instance {
+    public Concept c;
+    public String[] values;
 
-public class Instance extends Knowledge {
-    String instanceName;
-    String conceptName;
-    Map<String, String> attrs;
-    ArrayList<String> behaviorNames;
-
-    public void convertFromTest(InstanceTest instanceTest){
-        this.instanceName = instanceTest.objectName();
-        super.name = instanceName;
-        this.conceptName = instanceTest.className();
-        this.attrs = instanceTest.attrs();
-        this.behaviorNames = instanceTest.behaviorNames();
+    public Instance(Concept c){
+        this.c = c;
+        this.values = new String[c.attr_labels.size()];
     }
 
-    public Instance(){
-        super("", "[ATTR-VALUES GO HERE]", Agent.KClasses.INSTANCE);
+    public void addValue(String attr, String v){
+        values[c.attr_labels.indexOf(attr)] = v;
+    }
+    public String getValue(String attr){
+        return values[c.attr_labels.indexOf(attr)];
     }
 
-    public String toString(){
-        return String.format("%s of %s{%s, %s}", instanceName, conceptName, attrs.toString(), behaviorNames.toString());
-    }
 }

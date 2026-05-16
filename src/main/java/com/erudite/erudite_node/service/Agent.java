@@ -18,7 +18,8 @@ public class Agent {
         ALGORITHM,
         CONCEPT,
         INSTANCE,
-        STATE
+        STATE,
+        GOAL
     }
     KnowledgeBase approxKB;
     public static int kTypes = 6;
