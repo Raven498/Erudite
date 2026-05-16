@@ -1,8 +1,11 @@
 package com.erudite.erudite_node.logging;
 
-import java.time.LocalTime;
+import com.erudite.erudite_node.model.Environment;
+import com.erudite.erudite_node.model.Knowledge;
 import java.util.ArrayList;
 import java.io.*;
+import java.util.List;
+
 public class Logger {
     private static ArrayList<String> logs = new ArrayList<>();
     private static int logFileNumber = 1;
@@ -30,6 +33,26 @@ public class Logger {
             # TODO: add stats from Director, EpsilonManager, AccumulationManager, AKB
             """;
 
+    private static final String SELECTIVE_ENV_REPORT_START = """
+            ------->SELECTIVE ENV REPORT:
+            """;
+
+    private static final String SELECTIVE_ENV_REPORT_END = """
+            ------->END SELECTIVE ENV REPORT:
+            """;
+
+    private static final String FULL_ENV_REPORT_START = """
+            ------->FULL ENV REPORT:
+            """;
+
+    private static final String FULL_ENV_REPORT_END = """
+            ------->END FULL ENV REPORT:
+            """;
+
+    private static final String ENV_REPORT_LOG_STEM = """
+            K%d (env ID %s): %s
+            """;
+
     public static void printIterationStart(int round, int currentTime, int timeDiff, boolean delay){
         System.out.println(String.format(ITERATION_START, round, currentTime, timeDiff, delay));
     }
@@ -50,6 +73,26 @@ public class Logger {
         for(String log : logs){
             System.out.println(log);
         }
+    }
+
+    // full env report
+    public static void envReport(Environment env) {
+        logs.add(FULL_ENV_REPORT_START);
+        for (Knowledge k : env.getKnowledge()) {
+            logs.add(String.format(ENV_REPORT_LOG_STEM, env.getKnowledge().indexOf(k), k.content, k.toString()));
+        }
+        logs.add(FULL_ENV_REPORT_END);
+    }
+
+    // selective env report
+    public static void envReport(Environment env, List<String> selections) {
+        logs.add(SELECTIVE_ENV_REPORT_START);
+        for (Knowledge k : env.getKnowledge()) {
+            if (selections.contains(k.content)) {
+                logs.add(String.format(ENV_REPORT_LOG_STEM, env.getKnowledge().indexOf(k), k.content, k.toString()));
+            }
+        }
+        logs.add(SELECTIVE_ENV_REPORT_END);
     }
 
     // Write to a file
