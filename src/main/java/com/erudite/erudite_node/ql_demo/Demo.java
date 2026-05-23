@@ -118,20 +118,25 @@ public class Demo {
         Environment e_delta = new Environment();
         ArrayList<ArrayList<String>> attr_space = new ArrayList<>();
         ArrayList<ArrayList<ArrayList<Object>>> value_space = new ArrayList<>();
+        // episodic loop (for every episode)
         for(int i = 0; i < n; i++) {
             System.out.println("AT EPISODE: " + i);
+            // inner episodic loop (the actual episode)
             while (!goalSatisfied()) {
+                // for each action
                 for (int j = 0; j < 2; j++){
                     if (j == 0) {
                         blue_transition();
                     } else {
                         red_transition();
                     }
-
+                    // for all knowledge in the env
                     for(Knowledge k : e.getKnowledge()) {
+                        // for every Instance
                         if (k.getKClass() == Agent.KClasses.INSTANCE) {
                             InstanceKnowledge instance = (InstanceKnowledge) k;
                             InstanceKnowledge i_o = null;
+                            // getting the respective original instance for comparison purposes and change detection
                             for (Knowledge k_o : e_init.getKnowledge()) {
                                 if (k_o.content.equals(k.content)) {
                                     i_o = (InstanceKnowledge) k_o;
@@ -141,26 +146,45 @@ public class Demo {
                             if (i_o == null) {
                                 break;
                             }
-
+                            // for each attribute of this Instance
                             for (String attr : instance.c.attr_labels) {
                                 /*
                                 Instance's attribute value has changed from last iteration
                                  */
-
                                 if (!Objects.equals(instance.getValue(attr), i_o.getValue(attr))) {
                                     int k_index = e_delta.getKnowledge().indexOf(k);
+                                    // if this Instance has NOT already been detected as a delta in a previous iteration/episode
+                                        // This is for new delta Instances, so no need to track pre-existence of delta attrs/values (they won't already exist)
                                     if (!e_delta.getKnowledge().contains(k)) {
+                                        // add as NEW delta Instance
                                         e_delta.addKnowledge(k);
+                                        // add attr as NEW delta attr
                                         attr_space.add(new ArrayList<>(Arrays.asList(attr)));
-                                    } else {
+                                        // add value as NEW delta value
+                                        value_space.add(new ArrayList<>(Arrays.asList(new ArrayList<>(Arrays.asList(instance.getValue(attr))))));
+                                    }
+                                    // if this Instance HAS already been detected as a delta in a previous iteration/episode
+                                    // (even if a Instance is already a delta, a new delta attr of that Instance could've still been found)
+                                        // (AKA one delta Instance can have multiple delta attrs)
+                                    // this else statement processes this case
+                                    else {
                                         int a_index = attr_space.get(k_index).indexOf(attr);
+                                        // if the attr space does NOT already contain this attr as a delta attr for this particular delta Instance
                                         if (!attr_space.get(k_index).contains(attr)) {
+                                            // add attr as NEW delta attr
                                             attr_space.get(k_index).add(attr);
-                                            value_space.add(new ArrayList<>(Arrays.asList(new ArrayList<>(Arrays.asList(instance.getValue(attr))))));
-                                        } else {
+                                            // add value as NEW delta value for new delta attr in this particular delta Instance
+                                            value_space.get(k_index).add(new ArrayList<>(Arrays.asList(instance.getValue(attr))));
+                                        }
+                                        // if the attr space ALREADY contains this attr as a delta attr for this particular delta Instance
+                                        else {
+                                            // if the value space does NOT already contain this value of this delta attr for this particular delta Instance
                                             if (!value_space.get(k_index).get(a_index).contains(instance.getValue(attr))) {
+                                                // add NEW delta value to this delta attr for this particular delta Instance
                                                 value_space.get(k_index).get(a_index).add(instance.getValue(attr));
                                             }
+                                            // if the attr space ALREADY contains this attr as a delta attr for this particular delta Instance
+                                                // (don't have to do anything since the value is already there)
                                         }
                                     }
 
