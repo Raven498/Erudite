@@ -79,9 +79,7 @@ public class AccumulationManager {
     public static int getAKBSize(){
         int akbSize = 0;
         for(Environment env : akb.getEnvSet().values()){
-            for(Knowledge k : env.getKnowledge()){
-                akbSize += 1;
-            }
+            akbSize += env.getKnowledge().size();
         }
         return akbSize;
     }
