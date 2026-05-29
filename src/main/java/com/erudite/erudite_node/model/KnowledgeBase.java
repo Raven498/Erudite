@@ -2,6 +2,7 @@ package com.erudite.erudite_node.model;
 
 import com.erudite.erudite_node.model.Environment;
 import com.erudite.erudite_node.service.Agent;
+import org.springframework.boot.autoconfigure.couchbase.CouchbaseProperties;
 
 import java.util.*;
 
@@ -11,6 +12,9 @@ public class KnowledgeBase {
 
     public void addEnv(UUID uuid, Environment env) {
         env_set.putIfAbsent(uuid, env);
+    }
+    public Environment getEnv(UUID uuid){
+        return env_set.getOrDefault(uuid, new Environment());
     }
 
     public Map<UUID, Environment> getEnvSet() {

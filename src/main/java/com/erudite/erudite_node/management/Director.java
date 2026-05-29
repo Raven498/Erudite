@@ -163,10 +163,13 @@ public class Director {
             var env = new Environment(getTrueKnowledge());
             UUID true_env_id = UUID.randomUUID();
             tkb.addEnv(true_env_id, env);
-            EpsilonManager.epsilon(true_env_id);
+            EpsilonManager.expansion(true_env_id);
         } else { // Focus
 
         }
+
+        EpsilonManager.pes();
+        //EpsilonManager.pas();
     }
 
 

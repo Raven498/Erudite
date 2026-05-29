@@ -14,14 +14,18 @@ public class AccumulationManager {
     public static Agent agent = new Agent();
     public static final double[] K_TYPE_REL_DISTRIBUTION_REQ = new double[Agent.kTypes];
 
-    public static void accumulate(UUID true_env_id, List<Knowledge> knowledge) {
+    public static void expand(UUID true_env_id) {
+        var approx_env = new Environment();
+        akb.addEnv(true_env_id, approx_env);
+    }
+
+    public static void accumulate(UUID env_id, List<Knowledge> knowledge) {
         List<Knowledge> approxes = new ArrayList<>();
         for (Knowledge k : knowledge) {
             approxes.add(agent.approx(k));
         }
-        var approx_env = new Environment();
+        var approx_env = akb.getEnv(env_id);
         approx_env.addKnowledge(approxes);
-        akb.addEnv(true_env_id, approx_env);
         updateDistrib();
         System.out.println("AKB: " + akb);
     }
