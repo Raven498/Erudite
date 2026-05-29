@@ -3,12 +3,11 @@ package com.erudite.erudite_node.management;
 import com.erudite.erudite_node.model.Environment;
 import com.erudite.erudite_node.model.Knowledge;
 import com.erudite.erudite_node.service.Agent;
-import org.springframework.boot.autoconfigure.couchbase.CouchbaseProperties;
 
 import java.util.*;
 
 public class EpsilonManager {
-    private static double training_prob = 1.0;
+    private static double accum_prob = 1.0;
     private static final int LOTTERY_SAMPLE_SIZE = 10;
     private static final double WELFARE_SUBSET_THRESHOLD = 0.10;
 
@@ -18,7 +17,7 @@ public class EpsilonManager {
 
     public static void epsilon(UUID env_id) {
         double s = Math.random();
-        if (s <= training_prob) { // Train
+        if (s <= accum_prob) { // Train
             if(AccumulationManager.verify()){
                 AccumulationManager.accumulate(env_id, getRequiredKnowledge(AccumulationManager.getRequiredKTypes()));
             }
@@ -31,7 +30,7 @@ public class EpsilonManager {
     Constant-sized implementation of lottery system
     (AKB env samples will always be size LOTTERY_SAMPLE_SIZE)
      */
-    private static void lotteryConstant() {
+    public static void lotteryConstant() {
         // Sample AKB env set for random constant-sized subset of envs
         Random random = new Random();
         var env_set = AccumulationManager.getAKB().getEnvSet();
@@ -55,7 +54,7 @@ public class EpsilonManager {
     Random-sized implementation of lottery system
     (AKB env samples will have a random size between 1 and the AKB's env size)
      */
-    private static void lotteryRand() {
+    public static void lotteryRand() {
         // Sample AKB env set for random constant-sized subset of envs
         Random random = new Random();
         var env_set = AccumulationManager.getAKB().getEnvSet();
@@ -76,7 +75,7 @@ public class EpsilonManager {
         }
     }
 
-    private static void welfare() {
+    public static void welfare() {
         // Pick env subset with least k-size
         // (subset is (WELFARE_SUBSET_THRESHOLD)% of AKB env set)
         var env_set = AccumulationManager.getAKB().getEnvSet();
@@ -100,24 +99,16 @@ public class EpsilonManager {
         }
     }
 
-    public static void pes() {
-
-    }
-
-    public static void pas() {
-
-    }
-
     public static double getEpsilonProb(){
-        return training_prob;
+        return accum_prob;
     }
 
     public static void releaseAccumulationSpace(double scale){
-        training_prob -= scale;
+        accum_prob -= scale;
     }
 
     public static void addAccumulationSpace(double scale){
-        training_prob += scale;
+        accum_prob += scale;
     }
 
     private static ArrayList<Knowledge> getRequiredKnowledge(ArrayList<Agent.KClasses> requiredKTypes){

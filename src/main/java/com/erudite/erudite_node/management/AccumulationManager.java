@@ -12,6 +12,7 @@ import java.util.UUID;
 public class AccumulationManager {
     public static KnowledgeBase akb = new KnowledgeBase();
     public static Agent agent = new Agent();
+    private static final double ACCUM_THROTTLE = 0.05;
     public static final double[] K_TYPE_REL_DISTRIBUTION_REQ = new double[Agent.kTypes];
 
     public static void expand(UUID true_env_id) {
@@ -48,10 +49,10 @@ public class AccumulationManager {
     public static boolean verify(){
         ArrayList<Agent.KClasses> kTypes = getRequiredKTypes();
         if(kTypes.isEmpty()){
-            EpsilonManager.releaseAccumulationSpace(0.05);
+            EpsilonManager.releaseAccumulationSpace(ACCUM_THROTTLE);
             return false;
         } else{
-            EpsilonManager.addAccumulationSpace(0.05);
+            EpsilonManager.addAccumulationSpace(ACCUM_THROTTLE);
             return true;
         }
     }

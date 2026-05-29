@@ -22,6 +22,10 @@ import java.util.concurrent.TimeUnit;
  */
 public class Director {
     private static double expansion_prob = 1.0;
+    private static double lottery_prob = 1.0;
+    private static final double PES_DELTA = 0.05;
+    private static final double EXPANSION_THROTTLE = 0.05;
+
     public static KnowledgeBase tkb = new KnowledgeBase();
 
     public static Environment initEnv() {
@@ -155,6 +159,24 @@ public class Director {
         }
     }
 
+    /*
+    Progressive Epsilon System
+     */
+    public static void pes() {
+        double s = Math.random();
+        if (s <= lottery_prob) {
+            EpsilonManager.lotteryConstant();
+            //EpsilonManager.lotteryRand();
+        } else {
+            EpsilonManager.welfare();
+        }
+        lottery_prob -= PES_DELTA;
+    }
+
+    public static void pas() {
+
+    }
+
     public static void direct() {
         // Master epsilon
         double s = Math.random();
@@ -164,12 +186,11 @@ public class Director {
             UUID true_env_id = UUID.randomUUID();
             tkb.addEnv(true_env_id, env);
             EpsilonManager.expansion(true_env_id);
-        } else { // Focus
-
+            EpsilonManager.epsilon(true_env_id);
         }
-
-        EpsilonManager.pes();
-        //EpsilonManager.pas();
+        //pas();
+        pes();
+        expansion_prob -= EXPANSION_THROTTLE;
     }
 
 
