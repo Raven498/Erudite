@@ -14,4 +14,9 @@ public class Concept extends Knowledge {
         super(name, content, kclass);
         this.attr_labels = attr_labels;
     }
+
+    @Override
+    public String toString() {
+        return "CONCEPT ATTR LABELS: " + attr_labels.toString();
+    }
 }

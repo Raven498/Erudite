@@ -75,6 +75,10 @@ public class Logger {
         }
     }
 
+    public static void flushLogs() {
+        logs.clear();
+    }
+
     // full env report
     public static void envReport(Environment env) {
         logs.add(FULL_ENV_REPORT_START);

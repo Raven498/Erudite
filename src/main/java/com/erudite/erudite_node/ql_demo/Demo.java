@@ -1,5 +1,6 @@
 package com.erudite.erudite_node.ql_demo;
 
+import com.erudite.erudite_node.logging.Logger;
 import com.erudite.erudite_node.model.*;
 import com.erudite.erudite_node.service.Agent;
 
@@ -71,8 +72,12 @@ public class Demo {
                 }
             }
         }
-        System.out.println(matches);
-        return (matches == goal.values.size());
+        //System.out.println(matches);
+        if (matches == goal.values.size()){
+            goal.resolved = true;
+            return true;
+        }
+        return false;
     }
 
     public static Environment snapshotEnv(){
@@ -110,7 +115,7 @@ public class Demo {
         goal.values.add(i5);
         goal.values.add(i1);
 
-        List<Knowledge> tkb = new ArrayList<> (Arrays.asList(k1, k2, k3, k4, k5, k6, k7, k8, k12));
+        List<Knowledge> tkb = new ArrayList<> (Arrays.asList(k1, k2, k3, k4, k5, k6, k7, k8, k9, k12));
         e.addKnowledge(tkb);
         int n = 100;
         Environment e_master = snapshotEnv();
@@ -122,6 +127,7 @@ public class Demo {
         for(int i = 0; i < n; i++) {
             System.out.println("AT EPISODE: " + i);
             // inner episodic loop (the actual episode)
+            int z = 0;
             while (!goalSatisfied()) {
                 // for each action
                 for (int j = 0; j < 2; j++){
@@ -204,6 +210,12 @@ public class Demo {
                         }
                     }
                     e_init = snapshotEnv();
+                }
+                if (z < 5) {
+                    Logger.envReport(e, new ArrayList<>(Arrays.asList("I6")));
+                    Logger.printLogs();
+                    Logger.flushLogs();
+                    z += 1;
                 }
             }
             e_init = e_master;
