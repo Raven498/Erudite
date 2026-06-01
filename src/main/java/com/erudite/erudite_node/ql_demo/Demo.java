@@ -1,6 +1,5 @@
 package com.erudite.erudite_node.ql_demo;
 
-import com.erudite.erudite_node.logging.Logger;
 import com.erudite.erudite_node.model.*;
 import com.erudite.erudite_node.service.Agent;
 
@@ -141,6 +140,9 @@ public class Demo {
         Environment e_delta = new Environment();
         ArrayList<ArrayList<String>> attr_space = new ArrayList<>();
         ArrayList<ArrayList<ArrayList<Object>>> value_space = new ArrayList<>();
+        /*
+        META QL
+         */
         // episodic loop (for every episode)
         for(int i = 0; i < n; i++) {
             System.out.println("AT EPISODE: " + i);
@@ -257,6 +259,29 @@ public class Demo {
                         System.out.println(e_delta.getKnowledge().get(i).content + ": " + attr_space.get(i).get(j) + ": " + v);
                     }
                 }
+            }
+        }
+
+        /*
+        PRACTICAL QL
+         */
+        ArrayList<Object[]> specificVectors = new ArrayList<>();
+        ArrayList<Double> qValues = new ArrayList<>();
+        int EPISODE_THRESHOLD = 1000;
+        double EPSILON_MAX = 1.0;
+        double EPSILON_MIN = 0.05;
+        double epsilon = EPSILON_MAX;
+        double ALPHA = 0.7;
+        double GAMMA = 0.95;
+        double EPSILON_DECAY = 0.0005;
+
+        for (int i = 0; i < EPISODE_THRESHOLD; i++) {
+            epsilon = EPSILON_MIN + Math.pow((EPSILON_MAX - EPSILON_MIN), -(ALPHA * i));
+            e = e_master;
+            while (!goalSatisfied()) {
+                /*
+                epsilon-greedy
+                 */
             }
         }
     }
