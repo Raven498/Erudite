@@ -18,12 +18,13 @@ public class InstanceKnowledge extends Knowledge{
     public void addValue(String attr, Object v){
         values[c.attr_labels.indexOf(attr)] = v;
     }
+
     public Object getValue(String attr){
         return values[c.attr_labels.indexOf(attr)];
     }
     @Override
     public String toString() {
-        return String.format("OF CONCEPT %s (aka %s), [%s], VALUES: %s", c.name, c.content, c, Arrays.toString(values));
+        return String.format("%s OF CONCEPT %s (aka %s), [%s], VALUES: %s", this.content, c.name, c.content, c, Arrays.toString(values));
     }
 
 }
