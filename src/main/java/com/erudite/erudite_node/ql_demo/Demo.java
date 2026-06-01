@@ -116,6 +116,36 @@ public class Demo {
         return copy;
     }
 
+    private static void initSpecificVectorSpace(ArrayList<ArrayList<ArrayList<Object>>> value_space, ArrayList<Object[]> svs){
+        // partially flatten given value space
+        // this will remove the delta knowledge level from the value space, keeping the delta attr and value levels
+        ArrayList<ArrayList<Object>> flatValueSpace = new ArrayList<>();
+        for (ArrayList<ArrayList<Object>> k : value_space) {
+            flatValueSpace.addAll(k);
+        }
+
+        for (Object v_i : flatValueSpace.getFirst()) {
+            for (Object v_j : flatValueSpace.get(1)) {
+                svs.add(new Object[] {v_i, v_j});
+            }
+        }
+
+        ArrayList<Object[]> updatedVectors = new ArrayList<>();
+        for (int i = 2; i < flatValueSpace.size(); i++) {
+            for (Object v : flatValueSpace.get(i)) {
+                for (Object[] s : svs) {
+                    Object[] new_s = new Object[s.length + 1];
+                    new_s[new_s.length - 1] = v;
+                    updatedVectors.add(new_s);
+                }
+            }
+            svs.clear();
+            svs.addAll(updatedVectors);
+            updatedVectors.clear();
+        }
+
+    }
+
     public static void main(String[] args){
         i3.addValue("C2 color", i1); // I1 DEFAULT
 
@@ -275,6 +305,11 @@ public class Demo {
         double GAMMA = 0.95;
         double EPSILON_DECAY = 0.0005;
 
+        /*
+        init specific vector space
+         */
+        initSpecificVectorSpace(value_space, specificVectors);
+
         for (int i = 0; i < EPISODE_THRESHOLD; i++) {
             epsilon = EPSILON_MIN + Math.pow((EPSILON_MAX - EPSILON_MIN), -(ALPHA * i));
             e = e_master;
@@ -282,6 +317,18 @@ public class Demo {
                 /*
                 epsilon-greedy
                  */
+                Random random = new Random();
+                if (random.nextDouble() < epsilon) {
+                    // exploration
+                    if (random.nextInt(2) == 0) {
+                        blue_transition();
+                    } else {
+                        red_transition();
+                    }
+                } else {
+                    // exploitation (use argmax)
+                }
+
             }
         }
     }
