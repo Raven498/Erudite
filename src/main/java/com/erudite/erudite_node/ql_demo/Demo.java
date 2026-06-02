@@ -3,6 +3,7 @@ package com.erudite.erudite_node.ql_demo;
 import com.erudite.erudite_node.model.*;
 import com.erudite.erudite_node.service.Agent;
 
+import java.lang.reflect.Array;
 import java.util.*;
 
 public class Demo {
@@ -124,15 +125,17 @@ public class Demo {
             flatValueSpace.addAll(k);
         }
 
-        for (Object v_i : flatValueSpace.getFirst()) {
-            for (Object v_j : flatValueSpace.get(1)) {
-                svs.add(new Object[] {v_i, v_j});
-            }
+        // initialize svs with empty specific vectors
+        for (ArrayList<Object> a : flatValueSpace) {
+            svs.add(new Object[] {});
         }
 
+        /*
+        iteratively create new combinations of value space to derive specific vectors
+         */
         ArrayList<Object[]> updatedVectors = new ArrayList<>();
-        for (int i = 2; i < flatValueSpace.size(); i++) {
-            for (Object v : flatValueSpace.get(i)) {
+        for (ArrayList<Object> values : flatValueSpace) {
+            for (Object v : values) {
                 for (Object[] s : svs) {
                     Object[] new_s = new Object[s.length + 1];
                     new_s[new_s.length - 1] = v;
@@ -143,7 +146,36 @@ public class Demo {
             svs.addAll(updatedVectors);
             updatedVectors.clear();
         }
+    }
 
+    private static Object[] getCurrentSpecVector(Environment e_delta, ArrayList<ArrayList<String>> attr_space, int vectorSize) {
+        Object[] currSpecVector = new Object[vectorSize];
+        int currIndex = 0;
+        for (int k = 0; k < e_delta.getKnowledge().size(); k++) {
+            if (e_delta.getKnowledge().get(k).getKClass() == Agent.KClasses.INSTANCE) {
+                InstanceKnowledge instance = (InstanceKnowledge) e_delta.getKnowledge().get(k);
+                ArrayList<String> d_attr_set = attr_space.get(k);
+                for (String delta_attr : d_attr_set) {
+                    currSpecVector[currIndex] = instance.getValue(delta_attr);
+                    currIndex += 1;
+                }
+            }
+        }
+        return currSpecVector;
+    }
+
+    private static int q_argmax(Object[] currState, ArrayList<double[]> qTable, ArrayList<Object[]> specificVectorSpace) {
+        for (int s = 0; s < specificVectorSpace.size(); s++) {
+            if (Arrays.equals(specificVectorSpace.get(s), currState)) {
+                double[] qValues = qTable.get(s);
+                if (qValues[0] >= qValues[1]) {
+                    return 0;
+                } else {
+                    return 1;
+                }
+            }
+        }
+        return -1;
     }
 
     public static void main(String[] args){
@@ -296,7 +328,7 @@ public class Demo {
         PRACTICAL QL
          */
         ArrayList<Object[]> specificVectors = new ArrayList<>();
-        ArrayList<Double> qValues = new ArrayList<>();
+        ArrayList<double[]> qTable = new ArrayList<>();
         int EPISODE_THRESHOLD = 1000;
         double EPSILON_MAX = 1.0;
         double EPSILON_MIN = 0.05;
@@ -309,6 +341,14 @@ public class Demo {
         init specific vector space
          */
         initSpecificVectorSpace(value_space, specificVectors);
+
+        /*
+        init q table
+        format for each entry: {blueQ, redQ}
+         */
+        for (Object[] ignored : specificVectors) {
+            qTable.add(new double[] {0.0, 0.0});
+        }
 
         for (int i = 0; i < EPISODE_THRESHOLD; i++) {
             epsilon = EPSILON_MIN + Math.pow((EPSILON_MAX - EPSILON_MIN), -(ALPHA * i));
@@ -327,6 +367,23 @@ public class Demo {
                     }
                 } else {
                     // exploitation (use argmax)
+                    /*
+                    Construct current specific vector by finding current values of delta attrs
+                    Specific vectors are equivalent to states in practical QL, so this current spec vector is the current state
+                     */
+                    Object[] currState = getCurrentSpecVector(e_delta, attr_space, specificVectors.getFirst().length);
+
+                    // conduct argmax using current state
+                    int actionID = q_argmax(currState, qTable, specificVectors);
+                    // TODO: Implement all action execution handling in general in ActionController
+                    if (actionID == 0) {
+                        blue_transition();
+                    } else if (actionID == -1) {
+                        System.out.println("Could not find the current state in specific vector space");
+                        return;
+                    } else {
+                        red_transition();
+                    }
                 }
 
             }
