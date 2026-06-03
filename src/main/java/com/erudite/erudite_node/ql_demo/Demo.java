@@ -6,6 +6,26 @@ import com.erudite.erudite_node.service.Agent;
 import java.lang.reflect.Array;
 import java.util.*;
 
+/*
+ * This demo experiments with the Meta QL algorithm, which works to identify the aspects of an environment most likely to
+ * contribute to resolution of the environment by satisfying the goal (or reaching the terminal state). The inital version (V0)
+ * of this algorithm does this by stepping through the environment with randomly chosen actions for n episodes and detecting all environmental instances
+ * that changes after each time step. It stores them in another environment called the delta env, their delta attributes (the respective instances' attrs that
+ * change in response to random actions) in the attribute space, and their delta values (all possible values that delta attributes may change to in the env)
+ * in the value space.
+ *
+ * This demo also demonstrates another algorithm called Practical QL, which is mostly similar to regular Q learning but represents the states of its
+ * environment using the outputs of Meta QL. It builds the specific vector space (SVS), which is a set of vectors that represents all possible combinations
+ * of all values of all delta attrs (these vectors are called specific vectors). This SVS serves as the state space for Practical QL, with the specific vectors
+ * themselves being the states. From there, Practical QL conducts regular Q learning over all these vectors against all possible actions, and constructs the
+ * final Q table which, when followed, will hopefully result in environment resolution.
+ *
+ * This demo currently contains initial implementations of both algorithms along with a basic eval loop, but it requires many more
+ * overall functionality, testing, efficiency, and readability changes. All outstanding required changes are listed here in the form of TODOs:
+ * --> TODO:
+ * --> TODO:
+ * --> TODO:
+ */
 public class Demo {
     static Concept c1 = new Concept("Pot", "C1", Agent.KClasses.CONCEPT,
             new ArrayList<>(Arrays.asList("C2 color")));
@@ -31,20 +51,7 @@ public class Demo {
     static DemoGoal goal = new DemoGoal("Goal", "G1", Agent.KClasses.GOAL);
     static Knowledge k12 = goal;
     static Environment e = new Environment();
-    /*
-    ITER 1:
-    (Blue Trans): I3 color = blue --> I3 color = blue, I3 -> I3
-    (Red Trans): I3 color = blue --> I3 color = red, I3 -> I4
 
-    ITER 2:
-    (Blue Trans): I4 color = blue --> I4 color = blue, I4 -> I3
-    (Red Trans): I3 color = red --> I3 color = red, I3 -> I4
-
-    ITER 3:
-    (Blue Trans): I4 color = blue --> I4 color = blue, I4 -> I3
-    (Red Trans): I3 color = red -> I3 color = red, I3 -> I4
-    ...
-     */
     public static void red_transition(){
         InstanceKnowledge pot = (InstanceKnowledge) (i6.getValue("C1 pot"));
         pot.addValue("C2 color", i2);
@@ -59,12 +66,7 @@ public class Demo {
         }
     }
 
-    /*
-    (Red): I3 -> I4
-    (Blue): I4 -> I3
-    (Red): I3 -> I4
-    (Blue): I4 -> I3
-     */
+
     public static void blue_transition(){
         InstanceKnowledge pot = (InstanceKnowledge) (i6.getValue("C1 pot"));
         pot.addValue("C2 color", i1);
@@ -176,6 +178,22 @@ public class Demo {
             }
         }
         return -1;
+    }
+
+    private static double q_max(Object[] currState, ArrayList<double[]> qTable, ArrayList<Object[]> specificVectorSpace) {
+        int actionID = q_argmax(currState, qTable, specificVectorSpace);
+        return qTable.get(specificVectorSpace.indexOf(currState))[actionID];
+    }
+
+    /*
+    version 1 of the reward function
+    returns reward only in the terminal state
+     */
+    private static double rewardFuncV1() {
+        if (goalSatisfied()) {
+            return 1.0;
+        }
+        return 0.0;
     }
 
     public static void main(String[] args){
@@ -327,6 +345,7 @@ public class Demo {
         /*
         PRACTICAL QL
          */
+        e = e_master;
         ArrayList<Object[]> specificVectors = new ArrayList<>();
         ArrayList<double[]> qTable = new ArrayList<>();
         int EPISODE_THRESHOLD = 1000;
@@ -350,6 +369,9 @@ public class Demo {
             qTable.add(new double[] {0.0, 0.0});
         }
 
+        /*
+        episodic training loop
+         */
         for (int i = 0; i < EPISODE_THRESHOLD; i++) {
             epsilon = EPSILON_MIN + Math.pow((EPSILON_MAX - EPSILON_MIN), -(ALPHA * i));
             e = e_master;
@@ -376,6 +398,9 @@ public class Demo {
                     // conduct argmax using current state
                     int actionID = q_argmax(currState, qTable, specificVectors);
                     // TODO: Implement all action execution handling in general in ActionController
+                    /*
+                    this section is analogous to the transition function
+                     */
                     if (actionID == 0) {
                         blue_transition();
                     } else if (actionID == -1) {
@@ -384,10 +409,46 @@ public class Demo {
                     } else {
                         red_transition();
                     }
+
+                    Object[] newState = getCurrentSpecVector(e_delta, attr_space, specificVectors.getFirst().length);
+                    double reward = rewardFuncV1();
+                    qTable.get(specificVectors.indexOf(currState))[actionID] =
+                            qTable.get(specificVectors.indexOf(currState))[actionID] +
+                                    (ALPHA * (reward + (GAMMA * q_max(newState, qTable, specificVectors)) -
+                                            qTable.get(specificVectors.indexOf(currState))[actionID]));
                 }
 
             }
         }
+
+        System.out.println("-------------------- Q TABLE -----------------------");
+        // TODO: Create a way to visualize the Q table, especially the different combinations of specific vectors and their specific values
+
+        /*
+        EVALUATION
+         */
+        int iters = 0;
+        while (!goalSatisfied()) {
+            e = e_master;
+            Object[] currState = getCurrentSpecVector(e_delta, attr_space, specificVectors.getFirst().length);
+
+            // conduct argmax using current state
+            int actionID = q_argmax(currState, qTable, specificVectors);
+            // TODO: Implement all action execution handling in general in ActionController
+                    /*
+                    this section is analogous to the transition function
+                     */
+            if (actionID == 0) {
+                blue_transition();
+            } else if (actionID == -1) {
+                System.out.println("Could not find the current state in specific vector space");
+                return;
+            } else {
+                red_transition();
+            }
+            iters += 1;
+        }
+        System.out.println("FINAL EVAL TOOK: " + iters);
     }
 
 }
