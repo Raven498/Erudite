@@ -10,6 +10,15 @@ public class Environment {
         return knowledge;
     }
 
+    public Knowledge getKnowledge(String ID) {
+        for(Knowledge k : knowledge) {
+            if(k.content.equals(ID)) {
+                return k;
+            }
+        }
+        return null;
+    }
+
     public void addKnowledge(Knowledge k){
         knowledge.add(k);
     }

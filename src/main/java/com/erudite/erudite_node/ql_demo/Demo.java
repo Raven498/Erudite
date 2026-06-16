@@ -83,17 +83,15 @@ public class Demo {
             i6.addValue("C1 pot", i4);
         }
     }
-/*
-TODO: ***AN ISSUE LIES HERE FIX URGENTLY***
- */
+
     public static boolean goalSatisfied(){
         int matches = 0;
         for (int i = 0; i < goal.instances.size(); i++) {
-            if (goal.instances.get(i).getValue(goal.attr_labels.get(i)) == goal.values.get(i)) {
+            InstanceKnowledge e_instance = (InstanceKnowledge) (e.getKnowledge(goal.instances.get(i).content));
+            if (e_instance.getValue(goal.attr_labels.get(i)) == goal.values.get(i)) {
                 matches += 1;
             }
         }
-        //System.out.println(matches);
         if (matches == goal.values.size()){
             goal.resolved = true;
             return true;
@@ -406,9 +404,11 @@ TODO: ***AN ISSUE LIES HERE FIX URGENTLY***
         /*
         episodic training loop
          */
+        int num_of_term_episodes = 0;
         for (int i = 0; i < EPISODE_THRESHOLD; i++) {
             epsilon = EPSILON_MIN + ((EPSILON_MAX - EPSILON_MIN) * Math.exp(-EPSILON_DECAY * i));
             e = e_master;
+            System.out.println(((InstanceKnowledge) (e.getKnowledge("I6"))).getValue("C1 pot"));
             int z = 0;
             int actionID = 0;
             while (z < 99 && !goalSatisfied()) {
@@ -454,6 +454,7 @@ TODO: ***AN ISSUE LIES HERE FIX URGENTLY***
                 }
 
                 Object[] newState = getCurrentSpecVector(e_delta, attr_space, specificVectors.getFirst().length);
+                System.out.println("CALCULATING REWARD:");
                 double reward = rewardFuncV1();
                 String cp = ((InstanceKnowledge) (i6.getValue("C1 pot"))).content;
                 String col = ((InstanceKnowledge) (i5.getValue("C2 color"))).content;
@@ -474,13 +475,18 @@ TODO: ***AN ISSUE LIES HERE FIX URGENTLY***
                      */
                 qTable.get(svIndex)[actionID] =
                         qTable.get(svIndex)[actionID] +
-                                (ALPHA * (reward + (GAMMA * q_max(newState, qTable, specificVectors)) -
+                                (ALPHA * (reward + (GAMMA * q_max(newState, qTable, specificVectors)) - // TODO: ***ISSUE HERE***
                                         qTable.get(svIndex)[actionID]));
                 z += 1;
+            }
+            if (z == 0 && goalSatisfied()) {
+                System.out.println("The episode somehow ended early --> means the env is already solved somehow?");
+                num_of_term_episodes += 1;
             }
         }
 
         System.out.println("-------------------- Q TABLE -----------------------");
+        System.out.println("NUM OF TERM EPISODES: " + num_of_term_episodes);
         for (double[] d : qTable) {
             for (double i: d) {
                 System.out.print(i + ", ");
@@ -495,6 +501,7 @@ TODO: ***AN ISSUE LIES HERE FIX URGENTLY***
          */
         e = e_master;
         int iters = 0;
+        /*
         while (!goalSatisfied()) {
             e = e_master;
             Object[] currState = getCurrentSpecVector(e_delta, attr_space, specificVectors.getFirst().length);
@@ -502,9 +509,7 @@ TODO: ***AN ISSUE LIES HERE FIX URGENTLY***
             // conduct argmax using current state
             int actionID = q_argmax(currState, qTable, specificVectors);
             // TODO: Implement all action execution handling in general in ActionController
-                    /*
-                    this section is analogous to the transition function
-                     */
+                    //this section is analogous to the transition function
             if (actionID == 0) {
                 blue_transition();
             } else if (actionID == -1) {
@@ -520,6 +525,8 @@ TODO: ***AN ISSUE LIES HERE FIX URGENTLY***
             iters += 1;
         }
         System.out.println("FINAL EVAL TOOK: " + iters);
+
+         */
     }
 
 }
