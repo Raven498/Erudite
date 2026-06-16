@@ -2,6 +2,7 @@ package com.erudite.erudite_node.ql_demo;
 
 import com.erudite.erudite_node.model.*;
 import com.erudite.erudite_node.service.Agent;
+import jakarta.persistence.criteria.CriteriaBuilder;
 
 import java.lang.reflect.Array;
 import java.util.*;
@@ -22,9 +23,13 @@ import java.util.*;
  *
  * This demo currently contains initial implementations of both algorithms along with a basic eval loop, but it requires many more
  * overall functionality, testing, efficiency, and readability changes. All outstanding required changes are listed here in the form of TODOs:
- * --> TODO:
- * --> TODO:
- * --> TODO:
+ * --> TODO: Refactor all action execution logic into ActionController
+ * --> TODO: Generalize demo to include any number of actions by including and processing them as environmental knowledge
+ * --> TODO: Create a better way to visualize resulting Q table from Practical QL
+ * --> TODO: Refactor Meta, Practical QL algorithms into their own methods
+ * --> TODO: Ensure env resets are happening correctly at the right time in both QL algorithms
+ * --> TODO: Find ways to refactor and generalize QL algorithms and logic into separate and modular classes
+ * --> TODO: Figure out better terminating conditions for Meta QL loop
  */
 public class Demo {
     static Concept c1 = new Concept("Pot", "C1", Agent.KClasses.CONCEPT,
@@ -78,18 +83,14 @@ public class Demo {
             i6.addValue("C1 pot", i4);
         }
     }
-
+/*
+TODO: ***AN ISSUE LIES HERE FIX URGENTLY***
+ */
     public static boolean goalSatisfied(){
         int matches = 0;
-        for (Knowledge k : e.getKnowledge()){
-            if (k.getKClass() == Agent.KClasses.INSTANCE){
-                InstanceKnowledge i = (InstanceKnowledge) k;
-                if (goal.instances.contains(i.content)){
-                    int index = goal.instances.indexOf(i.content);
-                    if (i.getValue(goal.attr_labels.get(index)).equals(goal.values.get(index))){
-                        matches += 1;
-                    }
-                }
+        for (int i = 0; i < goal.instances.size(); i++) {
+            if (goal.instances.get(i).getValue(goal.attr_labels.get(i)) == goal.values.get(i)) {
+                matches += 1;
             }
         }
         //System.out.println(matches);
@@ -119,9 +120,14 @@ public class Demo {
         return copy;
     }
 
+    /*
+    TODO: When initializing the SVS, it produces duplicates of each specific vector
+    The number of duplicates for each vector seems to correspond with the number of values in each vector
+     */
     private static void initSpecificVectorSpace(ArrayList<ArrayList<ArrayList<Object>>> value_space, ArrayList<Object[]> svs){
         // partially flatten given value space
         // this will remove the delta knowledge level from the value space, keeping the delta attr and value levels
+        System.out.println("INIT SVS");
         ArrayList<ArrayList<Object>> flatValueSpace = new ArrayList<>();
         for (ArrayList<ArrayList<Object>> k : value_space) {
             flatValueSpace.addAll(k);
@@ -138,8 +144,10 @@ public class Demo {
         ArrayList<Object[]> updatedVectors = new ArrayList<>();
         for (ArrayList<Object> values : flatValueSpace) {
             for (Object v : values) {
+                System.out.println(v.toString());
                 for (Object[] s : svs) {
                     Object[] new_s = new Object[s.length + 1];
+                    System.arraycopy(s, 0, new_s, 0, s.length);
                     new_s[new_s.length - 1] = v;
                     updatedVectors.add(new_s);
                 }
@@ -180,9 +188,24 @@ public class Demo {
         return -1;
     }
 
+    private static int svsIndexOf(ArrayList<Object[]> specificVectorSpace, Object[] specificVector) {
+        for (int i = 0; i < specificVectorSpace.size(); i++) {
+            /*
+            for (Object o : specificVectorSpace.get(i)) {
+                System.out.print(((Knowledge) o).content + ",");
+            }
+             */
+            if (Arrays.equals(specificVectorSpace.get(i), specificVector)) {
+                return i;
+            }
+            //System.out.println();
+        }
+        return -1;
+    }
+
     private static double q_max(Object[] currState, ArrayList<double[]> qTable, ArrayList<Object[]> specificVectorSpace) {
         int actionID = q_argmax(currState, qTable, specificVectorSpace);
-        return qTable.get(specificVectorSpace.indexOf(currState))[actionID];
+        return qTable.get(svsIndexOf(specificVectorSpace, currState))[actionID];
     }
 
     /*
@@ -205,8 +228,13 @@ public class Demo {
 
         i6.addValue("C1 pot", i3);
 
-        goal.instances.add("CP1");
-        goal.instances.add("P3");
+        goal.instances.add(i6);
+        goal.instances.add(i5);
+        /*
+        goal:
+        CP1.pot = I5 (P3)
+        P3.color = I1 (Blue)
+         */
         goal.attr_labels.add("C1 pot");
         goal.attr_labels.add("C2 color");
         goal.values.add(i5);
@@ -348,7 +376,7 @@ public class Demo {
         e = e_master;
         ArrayList<Object[]> specificVectors = new ArrayList<>();
         ArrayList<double[]> qTable = new ArrayList<>();
-        int EPISODE_THRESHOLD = 1000;
+        int EPISODE_THRESHOLD = 10000;
         double EPSILON_MAX = 1.0;
         double EPSILON_MIN = 0.05;
         double epsilon = EPSILON_MAX;
@@ -360,7 +388,13 @@ public class Demo {
         init specific vector space
          */
         initSpecificVectorSpace(value_space, specificVectors);
-
+        System.out.println("SVS: ");
+        for (Object[] o : specificVectors) {
+            for (Object i: o) {
+                System.out.print(((Knowledge) i).content + ", ");
+            }
+            System.out.println();
+        }
         /*
         init q table
         format for each entry: {blueQ, redQ}
@@ -373,30 +407,38 @@ public class Demo {
         episodic training loop
          */
         for (int i = 0; i < EPISODE_THRESHOLD; i++) {
-            epsilon = EPSILON_MIN + Math.pow((EPSILON_MAX - EPSILON_MIN), -(ALPHA * i));
+            epsilon = EPSILON_MIN + ((EPSILON_MAX - EPSILON_MIN) * Math.exp(-EPSILON_DECAY * i));
             e = e_master;
-            while (!goalSatisfied()) {
+            int z = 0;
+            int actionID = 0;
+            while (z < 99 && !goalSatisfied()) {
                 /*
                 epsilon-greedy
                  */
                 Random random = new Random();
+                Object[] currState = getCurrentSpecVector(e_delta, attr_space, specificVectors.getFirst().length);
                 if (random.nextDouble() < epsilon) {
+                    //System.out.println("EXPLORE, " + epsilon);
                     // exploration
                     if (random.nextInt(2) == 0) {
                         blue_transition();
                     } else {
                         red_transition();
                     }
+
+                    String cp = ((InstanceKnowledge) (i6.getValue("C1 pot"))).content;
+                    if (Objects.equals(cp, i5.content)) {
+                        System.out.println("CP1->C1: " + cp);
+                    }
                 } else {
+                    //System.out.println("EXPLOIT, " + epsilon);
                     // exploitation (use argmax)
                     /*
                     Construct current specific vector by finding current values of delta attrs
                     Specific vectors are equivalent to states in practical QL, so this current spec vector is the current state
                      */
-                    Object[] currState = getCurrentSpecVector(e_delta, attr_space, specificVectors.getFirst().length);
-
                     // conduct argmax using current state
-                    int actionID = q_argmax(currState, qTable, specificVectors);
+                    actionID = q_argmax(currState, qTable, specificVectors);
                     // TODO: Implement all action execution handling in general in ActionController
                     /*
                     this section is analogous to the transition function
@@ -409,24 +451,49 @@ public class Demo {
                     } else {
                         red_transition();
                     }
-
-                    Object[] newState = getCurrentSpecVector(e_delta, attr_space, specificVectors.getFirst().length);
-                    double reward = rewardFuncV1();
-                    qTable.get(specificVectors.indexOf(currState))[actionID] =
-                            qTable.get(specificVectors.indexOf(currState))[actionID] +
-                                    (ALPHA * (reward + (GAMMA * q_max(newState, qTable, specificVectors)) -
-                                            qTable.get(specificVectors.indexOf(currState))[actionID]));
                 }
 
+                Object[] newState = getCurrentSpecVector(e_delta, attr_space, specificVectors.getFirst().length);
+                double reward = rewardFuncV1();
+                String cp = ((InstanceKnowledge) (i6.getValue("C1 pot"))).content;
+                String col = ((InstanceKnowledge) (i5.getValue("C2 color"))).content;
+                if (Objects.equals(cp, i5.content)) {
+                    System.out.println("R:" + reward);
+                }
+                if (Objects.equals(col, i1.content)) {
+                    //System.out.println("P3->C2: " + col);
+                }
+                int svIndex = svsIndexOf(specificVectors, currState);
+
+                //System.out.println("CURR STATE INDEX: " + svIndex);
+                    /*
+                    for (Object o : currState) {
+                        System.out.print(((Knowledge) o).content + ", ");
+                    }
+
+                     */
+                qTable.get(svIndex)[actionID] =
+                        qTable.get(svIndex)[actionID] +
+                                (ALPHA * (reward + (GAMMA * q_max(newState, qTable, specificVectors)) -
+                                        qTable.get(svIndex)[actionID]));
+                z += 1;
             }
         }
 
         System.out.println("-------------------- Q TABLE -----------------------");
-        // TODO: Create a way to visualize the Q table, especially the different combinations of specific vectors and their specific values
+        for (double[] d : qTable) {
+            for (double i: d) {
+                System.out.print(i + ", ");
+            }
+            System.out.println();
+        }
+
+        // TODO: Create a better way to visualize the Q table, especially the different combinations of specific vectors and their specific values
 
         /*
         EVALUATION
          */
+        e = e_master;
         int iters = 0;
         while (!goalSatisfied()) {
             e = e_master;
@@ -442,6 +509,10 @@ public class Demo {
                 blue_transition();
             } else if (actionID == -1) {
                 System.out.println("Could not find the current state in specific vector space");
+                System.out.println("Q TABLE: ");
+                for (double[] d : qTable) {
+                    System.out.println(Arrays.toString(d));
+                }
                 return;
             } else {
                 red_transition();

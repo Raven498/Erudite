@@ -8,7 +8,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class DemoGoal extends Knowledge {
-    public ArrayList<String> instances = new ArrayList<>();
+    public ArrayList<InstanceKnowledge> instances = new ArrayList<>();
     public ArrayList<String> attr_labels = new ArrayList<>();
     public ArrayList<Object> values = new ArrayList<>();
     public boolean resolved = false;
