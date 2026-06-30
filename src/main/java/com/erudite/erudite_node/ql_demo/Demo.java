@@ -58,29 +58,43 @@ public class Demo {
     static Environment e = new Environment();
 
     public static void red_transition(){
-        InstanceKnowledge pot = (InstanceKnowledge) (i6.getValue("C1 pot"));
+        //System.out.println("RED TRANS");
+        InstanceKnowledge i6_ref = (InstanceKnowledge) e.getKnowledge("I6");
+        InstanceKnowledge i3_ref = (InstanceKnowledge) e.getKnowledge("I3");
+        InstanceKnowledge i4_ref = (InstanceKnowledge) e.getKnowledge("I4");
+        InstanceKnowledge i5_ref = (InstanceKnowledge) e.getKnowledge("I5");
+
+        InstanceKnowledge pot = (InstanceKnowledge) (i6_ref.getValue("C1 pot"));
         pot.addValue("C2 color", i2);
         //System.out.println(pot.getValue("C2 color"));
         //System.out.println(((InstanceKnowledge) i6.getValue("C1 pot")).getValue("C2 color"));
-        if (i6.getValue("C1 pot") == i3) {
-            i6.addValue("C1 pot", i4);
-        } else if (i6.getValue("C1 pot") == i4) {
-            i6.addValue("C1 pot", i5);
-        } else if (i6.getValue("C1 pot") == i5) {
-            i6.addValue("C1 pot", i4);
+        if (i6_ref.getValue("C1 pot") == i3_ref) {
+            i6_ref.addValue("C1 pot", i4_ref);
+        } else if (i6_ref.getValue("C1 pot") == i4_ref) {
+            //System.out.println("SWITCHING TO I5 - RED");
+            i6_ref.addValue("C1 pot", i5_ref);
+        } else if (i6_ref.getValue("C1 pot") == i5_ref) {
+            //System.out.println("AN I-5 HAS BEEN FILED - RED");
+            i6_ref.addValue("C1 pot", i4_ref);
         }
     }
 
 
     public static void blue_transition(){
-        InstanceKnowledge pot = (InstanceKnowledge) (i6.getValue("C1 pot"));
+        //System.out.println("BLUE TRANS");
+        InstanceKnowledge i6_ref = (InstanceKnowledge) e.getKnowledge("I6");
+        InstanceKnowledge i3_ref = (InstanceKnowledge) e.getKnowledge("I3");
+        InstanceKnowledge i4_ref = (InstanceKnowledge) e.getKnowledge("I4");
+        InstanceKnowledge i5_ref = (InstanceKnowledge) e.getKnowledge("I5");
+        InstanceKnowledge pot = (InstanceKnowledge) (i6_ref.getValue("C1 pot"));
         pot.addValue("C2 color", i1);
-        if (i6.getValue("C1 pot") == i3) {
-            i6.addValue("C1 pot", i3);
-        } else if (i6.getValue("C1 pot") == i4) {
-            i6.addValue("C1 pot", i3);
-        } else if (i6.getValue("C1 pot") == i5) {
-            i6.addValue("C1 pot", i4);
+        if (i6.getValue("C1 pot") == i3_ref) {
+            i6.addValue("C1 pot", i3_ref);
+        } else if (i6.getValue("C1 pot") == i4_ref) {
+            i6.addValue("C1 pot", i3_ref);
+        } else if (i6.getValue("C1 pot") == i5_ref) {
+            //System.out.println("AN I-5 HAS BEEN FILED- BLUE");
+            i6.addValue("C1 pot", i4_ref);
         }
     }
 
@@ -102,6 +116,25 @@ public class Demo {
     public static Environment snapshotEnv(){
         Environment copy = new Environment();
         for (Knowledge k : e.getKnowledge()){
+            Knowledge k_copy = null;
+            if (k.getKClass() == Agent.KClasses.INSTANCE) {
+                InstanceKnowledge i = (InstanceKnowledge) k;
+                k_copy = new InstanceKnowledge(k.name, k.content, k.getKClass(), i.c);
+                var i_copy = (InstanceKnowledge) k_copy;
+                for (int j = 0; j < i.values.length; j++) {
+                    i_copy.addValue(i.c.attr_labels.get(j), i.values[j]);
+                }
+            } else {
+                k_copy = k;
+            }
+            copy.getKnowledge().add(k_copy);
+        }
+        return copy;
+    }
+
+    public static Environment snapshotEnv(Environment env){
+        Environment copy = new Environment();
+        for (Knowledge k : env.getKnowledge()){
             Knowledge k_copy = null;
             if (k.getKClass() == Agent.KClasses.INSTANCE) {
                 InstanceKnowledge i = (InstanceKnowledge) k;
@@ -142,7 +175,7 @@ public class Demo {
         ArrayList<Object[]> updatedVectors = new ArrayList<>();
         for (ArrayList<Object> values : flatValueSpace) {
             for (Object v : values) {
-                System.out.println(v.toString());
+                //System.out.println(v.toString());
                 for (Object[] s : svs) {
                     Object[] new_s = new Object[s.length + 1];
                     System.arraycopy(s, 0, new_s, 0, s.length);
@@ -193,6 +226,7 @@ public class Demo {
                 System.out.print(((Knowledge) o).content + ",");
             }
              */
+            System.out.println("SVS VECTOR: " + Arrays.toString(convertToIDVector(specificVectorSpace.get(i))));
             if (Arrays.equals(specificVectorSpace.get(i), specificVector)) {
                 return i;
             }
@@ -203,7 +237,17 @@ public class Demo {
 
     private static double q_max(Object[] currState, ArrayList<double[]> qTable, ArrayList<Object[]> specificVectorSpace) {
         int actionID = q_argmax(currState, qTable, specificVectorSpace);
-        return qTable.get(svsIndexOf(specificVectorSpace, currState))[actionID];
+        System.out.println(actionID);
+        System.out.println("CURR STATE: " + Arrays.toString(convertToIDVector(currState)));
+        return qTable.get(svsIndexOf(specificVectorSpace, currState))[actionID]; //svsIndexOf is -1
+    }
+
+    private static String[] convertToIDVector(Object[] stateVector) {
+        String[] idVector = new String[stateVector.length];
+        for (int i = 0; i < stateVector.length; i++) {
+            idVector[i] = ((Knowledge) (stateVector[i])).content;
+        }
+        return idVector;
     }
 
     /*
@@ -255,7 +299,7 @@ public class Demo {
             // inner episodic loop (the actual episode)
             int z = 0;
             while (!goalSatisfied()) {
-                if (z > 100) {
+                if (z > 500) {
                     System.out.println("GOAL NOT SATISFIED");
                     break;
                 }
@@ -263,8 +307,10 @@ public class Demo {
                 Random random = new Random();
                 int action = random.nextInt(2);
                 if (action == 0) {
+                    //System.out.println("BLUE TRANS");
                     blue_transition();
                 } else {
+                    //System.out.println("RED TRANS");
                     red_transition();
                 }
                 // for all knowledge in the env
@@ -281,18 +327,31 @@ public class Demo {
                         }
 
                         if (i_o == null) {
+                            System.out.println("COULD NOT FIND ORIGINAL INSTANCE");
                             break;
                         }
+
                         // for each attribute of this Instance
                         for (String attr : instance.c.attr_labels) {
                                 /*
                                 Instance's attribute value has changed from last iteration
                                  */
                             if (!Objects.equals(instance.getValue(attr), i_o.getValue(attr))) {
+                                System.out.println("INSTANCE VALUE CHANGED");
+                                System.out.println(instance.content);
+                                if (instance.content.equals("I5")) {
+                                    System.out.println("AN I5 ATTR HAS CHANGED");
+                                    System.out.println("I5 ATTR: " + attr);
+                                }
                                 int k_index = e_delta.getKnowledge().indexOf(k);
                                 // if this Instance has NOT already been detected as a delta in a previous iteration/episode
                                 // This is for new delta Instances, so no need to track pre-existence of delta attrs/values (they won't already exist)
                                 if (!e_delta.getKnowledge().contains(k)) {
+                                    if (instance.content.equals("I5")) {
+                                        System.out.println("I5 NOT ALREADY REGISTERED");
+                                        System.out.println("I5 ATTR BEING REGISTERED: " + attr);
+                                        System.out.println("I5 VALUE BEING REGISTERED: " + ((InstanceKnowledge) (instance.getValue(attr))).content);
+                                    }
                                     // add as NEW delta Instance
                                     e_delta.addKnowledge(k);
                                     // add attr as NEW delta attr
@@ -305,9 +364,16 @@ public class Demo {
                                 // (AKA one delta Instance can have multiple delta attrs)
                                 // this else statement processes this case
                                 else {
+                                    if (instance.content.equals("I5")) {
+                                        System.out.println("I5 ALREADY REGISTERED");
+                                    }
                                     int a_index = attr_space.get(k_index).indexOf(attr);
                                     // if the attr space does NOT already contain this attr as a delta attr for this particular delta Instance
                                     if (!attr_space.get(k_index).contains(attr)) {
+                                        if (instance.content.equals("I5")) {
+                                            System.out.println("I5 ATTR NOT ALREADY REGISTERED: " + attr);
+                                            System.out.println("I5 VALUE NOT ALREADY REGISTERED: " + ((InstanceKnowledge) (instance.getValue(attr))).content);
+                                        }
                                         // add attr as NEW delta attr
                                         attr_space.get(k_index).add(attr);
                                         // add value as NEW delta value for new delta attr in this particular delta Instance
@@ -315,13 +381,23 @@ public class Demo {
                                     }
                                     // if the attr space ALREADY contains this attr as a delta attr for this particular delta Instance
                                     else {
+                                        if (instance.content.equals("I5")) {
+                                            System.out.println("I5 ATTR ALREADY REGISTERED: " + attr);
+                                        }
                                         // if the value space does NOT already contain this value of this delta attr for this particular delta Instance
                                         if (!value_space.get(k_index).get(a_index).contains(instance.getValue(attr))) {
+                                            if (instance.content.equals("I5")) {
+                                                System.out.println("I5 VALUE NOT ALREADY REGISTERED: " + ((InstanceKnowledge) (instance.getValue(attr))).content);
+                                            }
                                             // add NEW delta value to this delta attr for this particular delta Instance
                                             value_space.get(k_index).get(a_index).add(instance.getValue(attr));
                                         }
                                         // if the attr space ALREADY contains this attr as a delta attr for this particular delta Instance
                                         // (don't have to do anything since the value is already there)
+                                        if (instance.content.equals("I5")) {
+                                            System.out.println("I5 VALUE ALREADY REGISTERED: " + ((InstanceKnowledge) (instance.getValue(attr))).content);
+                                            System.out.println("NOTHING TO DO");
+                                        }
                                     }
                                 }
 
@@ -337,6 +413,21 @@ public class Demo {
                                         value_space.get(e_delta.getKnowledge().indexOf(k)).add(instance.getValue(attr));
                                     }
                                 }*/
+                            else {
+                                /*
+                                System.out.println("NOT CHANGED");
+                                System.out.println("INSTANCE: " + instance.content);
+                                System.out.println("INSTANCE ATTR: " + attr);
+                                System.out.println("INSTANCE ATTR VAL: " + instance.getValue(attr));
+                                System.out.println("INSTANCE ORIGINAL ATTR VAL: " + i_o.getValue(attr));
+
+                                 */
+
+                            }
+                            if (instance.content.equals("I5") && z == 1) {
+                                //System.out.println("I5 ATTR NOT CHANGED: " + attr);
+                                //System.out.println("I5 VALUE: " + ((InstanceKnowledge) (instance.getValue(attr))).content);
+                            }
                         }
                     }
                 }
@@ -352,7 +443,8 @@ public class Demo {
 
                  */
             }
-            e_init = e_master;
+            e_init = snapshotEnv(e_master);
+            e = snapshotEnv(e_master);
         }
 
         System.out.println("-------------------- ENVIRONMENT DELTAS -----------------------");
@@ -408,7 +500,6 @@ public class Demo {
         for (int i = 0; i < EPISODE_THRESHOLD; i++) {
             epsilon = EPSILON_MIN + ((EPSILON_MAX - EPSILON_MIN) * Math.exp(-EPSILON_DECAY * i));
             e = e_master;
-            System.out.println(((InstanceKnowledge) (e.getKnowledge("I6"))).getValue("C1 pot"));
             int z = 0;
             int actionID = 0;
             while (z < 99 && !goalSatisfied()) {
@@ -428,7 +519,7 @@ public class Demo {
 
                     String cp = ((InstanceKnowledge) (i6.getValue("C1 pot"))).content;
                     if (Objects.equals(cp, i5.content)) {
-                        System.out.println("CP1->C1: " + cp);
+                        //System.out.println("CP1->C1: " + cp);
                     }
                 } else {
                     //System.out.println("EXPLOIT, " + epsilon);
@@ -446,7 +537,7 @@ public class Demo {
                     if (actionID == 0) {
                         blue_transition();
                     } else if (actionID == -1) {
-                        System.out.println("Could not find the current state in specific vector space");
+                        //System.out.println("Could not find the current state in specific vector space");
                         return;
                     } else {
                         red_transition();
@@ -454,16 +545,19 @@ public class Demo {
                 }
 
                 Object[] newState = getCurrentSpecVector(e_delta, attr_space, specificVectors.getFirst().length);
-                System.out.println("CALCULATING REWARD:");
                 double reward = rewardFuncV1();
                 String cp = ((InstanceKnowledge) (i6.getValue("C1 pot"))).content;
                 String col = ((InstanceKnowledge) (i5.getValue("C2 color"))).content;
+                /*
                 if (Objects.equals(cp, i5.content)) {
                     System.out.println("R:" + reward);
                 }
+
+                 */
                 if (Objects.equals(col, i1.content)) {
                     //System.out.println("P3->C2: " + col);
                 }
+                System.out.println("Searching for: " + Arrays.toString(convertToIDVector(currState)));
                 int svIndex = svsIndexOf(specificVectors, currState);
 
                 //System.out.println("CURR STATE INDEX: " + svIndex);
@@ -473,6 +567,7 @@ public class Demo {
                     }
 
                      */
+                System.out.println("SV INDEX: " + svIndex);
                 qTable.get(svIndex)[actionID] =
                         qTable.get(svIndex)[actionID] +
                                 (ALPHA * (reward + (GAMMA * q_max(newState, qTable, specificVectors)) - // TODO: ***ISSUE HERE***
