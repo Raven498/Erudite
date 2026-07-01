@@ -100,6 +100,7 @@ public class Demo {
 
     public static boolean goalSatisfied(){
         int matches = 0;
+        DemoGoal goal = (DemoGoal) e.getKnowledge("G1");
         for (int i = 0; i < goal.instances.size(); i++) {
             InstanceKnowledge e_instance = (InstanceKnowledge) (e.getKnowledge(goal.instances.get(i).content));
             if (e_instance.getValue(goal.attr_labels.get(i)) == goal.values.get(i)) {
@@ -113,25 +114,6 @@ public class Demo {
         return false;
     }
 
-    public static Environment snapshotEnv(){
-        Environment copy = new Environment();
-        for (Knowledge k : e.getKnowledge()){
-            Knowledge k_copy = null;
-            if (k.getKClass() == Agent.KClasses.INSTANCE) {
-                InstanceKnowledge i = (InstanceKnowledge) k;
-                k_copy = new InstanceKnowledge(k.name, k.content, k.getKClass(), i.c);
-                var i_copy = (InstanceKnowledge) k_copy;
-                for (int j = 0; j < i.values.length; j++) {
-                    i_copy.addValue(i.c.attr_labels.get(j), i.values[j]);
-                }
-            } else {
-                k_copy = k;
-            }
-            copy.getKnowledge().add(k_copy);
-        }
-        return copy;
-    }
-
     public static Environment snapshotEnv(Environment env){
         Environment copy = new Environment();
         for (Knowledge k : env.getKnowledge()){
@@ -143,10 +125,29 @@ public class Demo {
                 for (int j = 0; j < i.values.length; j++) {
                     i_copy.addValue(i.c.attr_labels.get(j), i.values[j]);
                 }
-            } else {
+            }
+            else {
                 k_copy = k;
             }
             copy.getKnowledge().add(k_copy);
+        }
+
+        for (int j = 0; j < copy.getKnowledge().size(); j++) {
+            Knowledge k_copy = null;
+            Knowledge k = copy.getKnowledge().get(j);
+            if (k.getKClass() == Agent.KClasses.GOAL) {
+                DemoGoal g = (DemoGoal) k;
+                DemoGoal g_copy = new DemoGoal(g.name, g.content, Agent.KClasses.GOAL);
+                for (InstanceKnowledge i : g.instances) {
+                    InstanceKnowledge i_copy = (InstanceKnowledge) (copy.getKnowledge(i.content));
+                    g_copy.instances.add(i_copy);
+                }
+                g_copy.attr_labels = g.attr_labels;
+                g_copy.values = g.values;
+                g_copy.resolved = g.resolved;
+                k_copy = g_copy;
+                copy.getKnowledge().set(j, k_copy);
+            }
         }
         return copy;
     }
@@ -285,7 +286,7 @@ public class Demo {
         List<Knowledge> tkb = new ArrayList<> (Arrays.asList(k1, k2, k3, k4, k5, k6, k7, k8, k9, k12));
         e.addKnowledge(tkb);
         int n = 100;
-        Environment e_master = snapshotEnv();
+        Environment e_master = snapshotEnv(e);
         Environment e_init = e_master;
         Environment e_delta = new Environment();
         ArrayList<ArrayList<String>> attr_space = new ArrayList<>();
@@ -299,6 +300,7 @@ public class Demo {
             // inner episodic loop (the actual episode)
             int z = 0;
             while (!goalSatisfied()) {
+                System.out.println("STARTING EPISODE");
                 if (z > 500) {
                     System.out.println("GOAL NOT SATISFIED");
                     break;
@@ -431,7 +433,7 @@ public class Demo {
                         }
                     }
                 }
-                e_init = snapshotEnv();
+                e_init = snapshotEnv(e);
                 /*
                 if (z < 5) {
                     Logger.envReport(e, new ArrayList<>(Arrays.asList("I6")));
@@ -463,10 +465,10 @@ public class Demo {
         /*
         PRACTICAL QL
          */
-        e = e_master;
+        e = snapshotEnv(e_master);
         ArrayList<Object[]> specificVectors = new ArrayList<>();
         ArrayList<double[]> qTable = new ArrayList<>();
-        int EPISODE_THRESHOLD = 10000;
+        int EPISODE_THRESHOLD = 1000;
         double EPSILON_MAX = 1.0;
         double EPSILON_MIN = 0.05;
         double epsilon = EPSILON_MAX;
@@ -499,7 +501,7 @@ public class Demo {
         int num_of_term_episodes = 0;
         for (int i = 0; i < EPISODE_THRESHOLD; i++) {
             epsilon = EPSILON_MIN + ((EPSILON_MAX - EPSILON_MIN) * Math.exp(-EPSILON_DECAY * i));
-            e = e_master;
+            e = snapshotEnv(e_master);
             int z = 0;
             int actionID = 0;
             while (z < 99 && !goalSatisfied()) {
@@ -594,7 +596,7 @@ public class Demo {
         /*
         EVALUATION
          */
-        e = e_master;
+        e = snapshotEnv(e_master);
         int iters = 0;
         /*
         while (!goalSatisfied()) {
